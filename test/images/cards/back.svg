@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="200" height="280">
+  <defs>
+    <linearGradient id="backBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   style="stop-color:#111827"/>
+      <stop offset="100%" style="stop-color:#312e81"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
+      <circle cx="7.5" cy="7.5" r="2" fill="#d4af37" opacity="0.55"/>
+    </pattern>
+  </defs>
+  <rect width="200" height="280" rx="12" fill="url(#backBg)"/>
+  <rect x="1"  y="1"  width="198" height="278" rx="11" fill="none" stroke="#d4af37" stroke-width="2"/>
+  <rect x="8"  y="8"  width="184" height="264" rx="8"  fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.6"/>
+  <rect x="10" y="10" width="180" height="260" rx="6"  fill="url(#dots)"/>
+  <!-- Center diamond ornament -->
+  <polygon points="100,88 132,140 100,192 68,140" fill="none" stroke="#d4af37" stroke-width="2" opacity="0.35"/>
+  <polygon points="100,104 118,140 100,176 82,140" fill="#d4af37" opacity="0.1"/>
+  <!-- Corner marks -->
+  <polygon points="22,20 30,28 22,36 14,28" fill="#d4af37" opacity="0.45"/>
+  <polygon points="178,20 186,28 178,36 170,28" fill="#d4af37" opacity="0.45"/>
+  <polygon points="22,244 30,252 22,260 14,252" fill="#d4af37" opacity="0.45"/>
+  <polygon points="178,244 186,252 178,260 170,252" fill="#d4af37" opacity="0.45"/>
+</svg>
