@@ -651,3 +651,73 @@ h1 {
 #board.screen-shake {
   animation: screen-shake 0.4s ease-out;
 }
+
+/* ============================================
+   Responsive (Mobile Settings)
+   ============================================ */
+
+@media (max-width: 768px) {
+  :root {
+    --card-width: 70px;
+    --card-height: 98px;
+    --card-spacing-x: 10px;
+    --card-spacing-y: 16px;
+    --card-offset-y: 18px;
+    --board-padding: 15px;
+  }
+  #board {
+    gap: 20px;
+  }
+  .game-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --card-width: 46px;
+    --card-height: 64px;
+    --card-spacing-x: 4px;
+    --card-spacing-y: 8px;
+    --card-offset-y: 14px;
+    --card-offset-y-hidden: 4px;
+    --board-padding: 6px;
+  }
+  
+  #board {
+    gap: 15px;
+  }
+
+  .game-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .controls {
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .stats {
+    font-size: 11px;
+    gap: 8px;
+  }
+
+  .foundation-pile {
+    font-size: 24px;
+  }
+}
+
