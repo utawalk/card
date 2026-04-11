@@ -114,8 +114,8 @@ foreach ($suit in $suits) {
             $centerSvg = Get-PipSvg $rank $entity $color
         }
 
-        $cfs  = if ($rank -eq "10") { "32" } else { "38" }
-        $csfs = if ($rank -eq "10") { "24" } else { "28" }
+        $cfs  = if ($rank -eq "10") { "42" } else { "54" }
+        $csfs = if ($rank -eq "10") { "32" } else { "38" }
 
         $svg = @"
 <?xml version="1.0" encoding="UTF-8"?>
@@ -134,12 +134,12 @@ foreach ($suit in $suits) {
   <rect x="6" y="6" width="188" height="268" rx="8" fill="none" stroke="#d4af37" stroke-width="0.5" opacity="0.4"/>
 
   <!-- Top-left corner -->
-  <text x="28" y="38" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central">$rank</text>
-  <text x="28" y="74" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central">$entity</text>
+  <text x="32" y="44" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central">$rank</text>
+  <text x="32" y="86" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central">$entity</text>
 
   <!-- Bottom-right corner (rotated 180deg) -->
-  <text x="172" y="242" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,172,242)">$rank</text>
-  <text x="172" y="206" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,172,206)">$entity</text>
+  <text x="168" y="236" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,168,236)">$rank</text>
+  <text x="168" y="194" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,168,194)">$entity</text>
 
 $centerSvg
 </svg>
