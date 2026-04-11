@@ -61,11 +61,54 @@ function createCardElement(card) {
 //  Full Render Loop
 // ============================================================
 function renderBoard() {
+  // FLIPアニメーション: 描画前のカードの位置を記憶 (First)
+  const oldPositions = new Map();
+  document.querySelectorAll('.card').forEach(el => {
+    // ドラッグ中のカードはアニメーション対象外とする
+    if (el.dataset.id && !el.classList.contains('dragging')) {
+      oldPositions.set(el.dataset.id, el.getBoundingClientRect());
+    }
+  });
+
   renderStock();
   renderTalon();
   renderFoundations();
   renderTableau();
   updateStats();
+
+  // FLIPアニメーション: 描画後の新しい位置を計算し、アニメーションさせる (Last, Invert, Play)
+  document.querySelectorAll('.card').forEach(el => {
+    if (el.dataset.id && oldPositions.has(el.dataset.id)) {
+      const oldRect = oldPositions.get(el.dataset.id);
+      const newRect = el.getBoundingClientRect();
+      
+      const dx = oldRect.left - newRect.left;
+      const dy = oldRect.top - newRect.top;
+      
+      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+        // 元々設定されているtransform（山札のズレなど）を保持
+        const originalTransform = el.style.transform || '';
+        
+        // 古い位置に逆引き (Invert)
+        el.style.transform = `translate(${dx}px, ${dy}px) ${originalTransform}`;
+        el.style.transition = 'none';
+        el.style.zIndex = '999'; // 移動中は手前に表示
+        
+        // DOMの変更を確定させる (Force Reflow)
+        el.getBoundingClientRect();
+        
+        // 新しい位置へアニメーション (Play)
+        el.style.transition = 'transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        el.style.transform = originalTransform;
+        
+        // アニメーション完了後にスタイルをクリーンアップ
+        setTimeout(() => {
+          el.style.transition = '';
+          el.style.zIndex = '';
+        }, 350);
+      }
+    }
+  });
 }
 
 // Render Stock

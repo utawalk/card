@@ -134,12 +134,12 @@ foreach ($suit in $suits) {
   <rect x="6" y="6" width="188" height="268" rx="8" fill="none" stroke="#d4af37" stroke-width="0.5" opacity="0.4"/>
 
   <!-- Top-left corner -->
-  <text x="32" y="44" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central">$rank</text>
-  <text x="32" y="86" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central">$entity</text>
+  <text x="26" y="30" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central">$rank</text>
+  <text x="26" y="72" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central">$entity</text>
 
   <!-- Bottom-right corner (rotated 180deg) -->
-  <text x="168" y="236" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,168,236)">$rank</text>
-  <text x="168" y="194" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,168,194)">$entity</text>
+  <text x="174" y="250" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,174,250)">$rank</text>
+  <text x="174" y="208" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,174,208)">$entity</text>
 
 $centerSvg
 </svg>

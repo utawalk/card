@@ -96,9 +96,6 @@ function initGame() {
     playSound('flip');
     startNewGame();
   });
-  document.getElementById('deadlock-close-btn').addEventListener('click', () => {
-    hideDeadlock();
-  });
 
   // ヒントボタン
   document.getElementById('hint-btn').addEventListener('click', () => {
@@ -296,12 +293,9 @@ function endDrag(e) {
   // Calculate where we dropped it
   const dropTarget = getDropTarget(clientX, clientY);
 
-  // 判定後にスタイルを戻す（renderBoard() がすぐ上書きするので一時的で良い）
+  // 判定後に可視性だけ戻す（位置情報(fixed)はそのまま残しておくことで、直後のrenderBoardでのFLIPがドロップ位置から綺麗にアニメーションする）
   dragState.elements.forEach(el => {
     el.style.visibility = '';
-    el.style.position = 'absolute';
-    el.style.width = 'var(--card-width)';
-    el.style.height = 'var(--card-height)';
   });
   
   let moveSuccessful = false;
