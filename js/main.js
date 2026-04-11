@@ -676,13 +676,8 @@ function showHint() {
   const btn = document.getElementById('hint-btn');
 
   if (!hint) {
-    // ヒントなし → ボタンを一瞬赤く光らせて「手なし」を伝える
-    btn.textContent = '❌ 手なし';
-    btn.classList.add('hint-active');
-    hintState.timer = setTimeout(() => {
-      btn.textContent = '💡 ヒント';
-      btn.classList.remove('hint-active');
-    }, 1500);
+    // ヒントなし（手なし）の場合、メインの手なし画面を表示する
+    showDeadlock();
     return;
   }
 

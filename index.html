@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Solitaire</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <header class="game-header">
+      <h1>Solitaire</h1>
+      <div class="controls">
+        <button id="new-game-btn" class="btn primary-btn">New Game</button>
+        <button id="auto-foundation-btn" class="btn auto-btn">🤖 AUTO</button>
+        <button id="hint-btn" class="btn hint-btn">💡 ヒント</button>
+        <div class="stats">
+          <span id="score-display">Score: 0</span>
+          <span id="moves-display">Moves: 0</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="board">
+      <div class="top-row">
+        <!-- 山札 (Stock) と めくり札 (Talon) -->
+        <div class="stock-talon-area">
+          <div id="stock" class="pile stock-pile"></div>
+          <div id="talon" class="pile talon-pile"></div>
+        </div>
+
+        <!-- 空白エリア（デザイン用） -->
+        <div class="spacer-area"></div>
+
+        <!-- 組札 (Foundation: 4スート) -->
+        <div class="foundation-area">
+          <div id="foundation-0" class="pile foundation-pile" data-suit="spades"></div>
+          <div id="foundation-1" class="pile foundation-pile" data-suit="hearts"></div>
+          <div id="foundation-2" class="pile foundation-pile" data-suit="clubs"></div>
+          <div id="foundation-3" class="pile foundation-pile" data-suit="diamonds"></div>
+        </div>
+      </div>
+
+      <div class="bottom-row">
+        <!-- 場札 (Tableau: 7列) -->
+        <div id="tableau-0" class="pile tableau-pile"></div>
+        <div id="tableau-1" class="pile tableau-pile"></div>
+        <div id="tableau-2" class="pile tableau-pile"></div>
+        <div id="tableau-3" class="pile tableau-pile"></div>
+        <div id="tableau-4" class="pile tableau-pile"></div>
+        <div id="tableau-5" class="pile tableau-pile"></div>
+        <div id="tableau-6" class="pile tableau-pile"></div>
+      </div>
+    </main>
+
+    <!-- 勝利画面のオーバーレイ -->
+    <div id="victory-overlay" class="overlay hidden">
+      <div class="victory-modal">
+        <h2>You Won! 🎉</h2>
+        <p>Congratulations! You've successfully cleared the game.</p>
+        <div class="final-stats">
+          <span id="final-score">Score: 0</span>
+          <span id="final-moves">Moves: 0</span>
+        </div>
+        <button id="play-again-btn" class="btn primary-btn">Play Again</button>
+      </div>
+    </div>
+
+    <!-- パーティクルエフェクト用レイヤー -->
+    <div id="particle-layer"></div>
+
+    <!-- キング完成グロー用オーバーレイ -->
+    <div id="king-glow-overlay"></div>
+
+    <!-- 手詰まり告知オーバーレイ -->
+    <div id="deadlock-overlay" class="overlay hidden">
+      <div class="deadlock-modal">
+        <div class="deadlock-icon">🚫</div>
+        <h2 style="font-size: 48px; margin: 15px 0;">手なし</h2>
+        <p>これ以上動かせるカードがありません。</p>
+        <div class="deadlock-actions">
+          <button id="deadlock-new-game-btn" class="btn primary-btn" style="font-size: 18px; padding: 12px 24px;">次のゲームを始める</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/logic.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
