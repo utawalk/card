@@ -114,8 +114,8 @@ foreach ($suit in $suits) {
             $centerSvg = Get-PipSvg $rank $entity $color
         }
 
-        $cfs  = if ($rank -eq "10") { "17" } else { "22" }
-        $csfs = if ($rank -eq "10") { "13" } else { "16" }
+        $cfs  = if ($rank -eq "10") { "32" } else { "38" }
+        $csfs = if ($rank -eq "10") { "24" } else { "28" }
 
         $svg = @"
 <?xml version="1.0" encoding="UTF-8"?>
@@ -134,12 +134,12 @@ foreach ($suit in $suits) {
   <rect x="6" y="6" width="188" height="268" rx="8" fill="none" stroke="#d4af37" stroke-width="0.5" opacity="0.4"/>
 
   <!-- Top-left corner -->
-  <text x="16" y="32" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle">$rank</text>
-  <text x="16" y="52" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle">$entity</text>
+  <text x="28" y="38" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central">$rank</text>
+  <text x="28" y="74" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central">$entity</text>
 
   <!-- Bottom-right corner (rotated 180deg) -->
-  <text x="184" y="258" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" transform="rotate(180,184,258)">$rank</text>
-  <text x="184" y="238" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" transform="rotate(180,184,238)">$entity</text>
+  <text x="172" y="242" font-family="Georgia,serif" font-size="$cfs" font-weight="900" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,172,242)">$rank</text>
+  <text x="172" y="206" font-family="Arial,sans-serif" font-size="$csfs" fill="$color" text-anchor="middle" dominant-baseline="central" transform="rotate(180,172,206)">$entity</text>
 
 $centerSvg
 </svg>

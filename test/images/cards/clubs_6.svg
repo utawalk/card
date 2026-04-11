@@ -14,12 +14,12 @@
   <rect x="6" y="6" width="188" height="268" rx="8" fill="none" stroke="#d4af37" stroke-width="0.5" opacity="0.4"/>
 
   <!-- Top-left corner -->
-  <text x="16" y="32" font-family="Georgia,serif" font-size="22" font-weight="900" fill="#0f172a" text-anchor="middle">6</text>
-  <text x="16" y="52" font-family="Arial,sans-serif" font-size="16" fill="#0f172a" text-anchor="middle">&#x2663;</text>
+  <text x="28" y="38" font-family="Georgia,serif" font-size="38" font-weight="900" fill="#0f172a" text-anchor="middle" dominant-baseline="central">6</text>
+  <text x="28" y="74" font-family="Arial,sans-serif" font-size="28" fill="#0f172a" text-anchor="middle" dominant-baseline="central">&#x2663;</text>
 
   <!-- Bottom-right corner (rotated 180deg) -->
-  <text x="184" y="258" font-family="Georgia,serif" font-size="22" font-weight="900" fill="#0f172a" text-anchor="middle" transform="rotate(180,184,258)">6</text>
-  <text x="184" y="238" font-family="Arial,sans-serif" font-size="16" fill="#0f172a" text-anchor="middle" transform="rotate(180,184,238)">&#x2663;</text>
+  <text x="172" y="242" font-family="Georgia,serif" font-size="38" font-weight="900" fill="#0f172a" text-anchor="middle" dominant-baseline="central" transform="rotate(180,172,242)">6</text>
+  <text x="172" y="206" font-family="Arial,sans-serif" font-size="28" fill="#0f172a" text-anchor="middle" dominant-baseline="central" transform="rotate(180,172,206)">&#x2663;</text>
 
   <text x="60" y="70" font-family="Arial,sans-serif" font-size="22" fill="#0f172a" text-anchor="middle" dominant-baseline="middle">&#x2663;</text>
   <text x="140" y="70" font-family="Arial,sans-serif" font-size="22" fill="#0f172a" text-anchor="middle" dominant-baseline="middle">&#x2663;</text>
