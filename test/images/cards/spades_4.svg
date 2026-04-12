@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="200" height="280">
   <defs>
     <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -15,11 +15,11 @@
 
   <!-- Top-left corner -->
   <text x="26" y="30" font-family="Georgia,serif" font-size="54" font-weight="900" fill="#0f172a" text-anchor="middle" dominant-baseline="central">4</text>
-  <text x="26" y="72" font-family="Arial,sans-serif" font-size="38" fill="#0f172a" text-anchor="middle" dominant-baseline="central">&#x2660;</text>
+  <text x="26" y="76" font-family="Arial,sans-serif" font-size="48" fill="#0f172a" text-anchor="middle" dominant-baseline="central">&#x2660;</text>
 
   <!-- Bottom-right corner (rotated 180deg) -->
   <text x="174" y="250" font-family="Georgia,serif" font-size="54" font-weight="900" fill="#0f172a" text-anchor="middle" dominant-baseline="central" transform="rotate(180,174,250)">4</text>
-  <text x="174" y="208" font-family="Arial,sans-serif" font-size="38" fill="#0f172a" text-anchor="middle" dominant-baseline="central" transform="rotate(180,174,208)">&#x2660;</text>
+  <text x="174" y="204" font-family="Arial,sans-serif" font-size="48" fill="#0f172a" text-anchor="middle" dominant-baseline="central" transform="rotate(180,174,204)">&#x2660;</text>
 
   <text x="60" y="70" font-family="Arial,sans-serif" font-size="22" fill="#0f172a" text-anchor="middle" dominant-baseline="middle">&#x2660;</text>
   <text x="140" y="70" font-family="Arial,sans-serif" font-size="22" fill="#0f172a" text-anchor="middle" dominant-baseline="middle">&#x2660;</text>

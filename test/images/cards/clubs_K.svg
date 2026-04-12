@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" width="200" height="280">
   <defs>
     <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -15,11 +15,11 @@
 
   <!-- Top-left corner -->
   <text x="26" y="30" font-family="Georgia,serif" font-size="54" font-weight="900" fill="#0f172a" text-anchor="middle" dominant-baseline="central">K</text>
-  <text x="26" y="72" font-family="Arial,sans-serif" font-size="38" fill="#0f172a" text-anchor="middle" dominant-baseline="central">&#x2663;</text>
+  <text x="26" y="76" font-family="Arial,sans-serif" font-size="48" fill="#0f172a" text-anchor="middle" dominant-baseline="central">&#x2663;</text>
 
   <!-- Bottom-right corner (rotated 180deg) -->
   <text x="174" y="250" font-family="Georgia,serif" font-size="54" font-weight="900" fill="#0f172a" text-anchor="middle" dominant-baseline="central" transform="rotate(180,174,250)">K</text>
-  <text x="174" y="208" font-family="Arial,sans-serif" font-size="38" fill="#0f172a" text-anchor="middle" dominant-baseline="central" transform="rotate(180,174,208)">&#x2663;</text>
+  <text x="174" y="204" font-family="Arial,sans-serif" font-size="48" fill="#0f172a" text-anchor="middle" dominant-baseline="central" transform="rotate(180,174,204)">&#x2663;</text>
 
   <rect x="20" y="50" width="160" height="180" rx="4" fill="#f0f0ff" opacity="0.55"/>
   <polygon points="45,103 65,72 100,92 135,72 155,103 155,122 45,122" fill="#1e1b4b" opacity="0.75"/>
