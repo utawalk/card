@@ -177,6 +177,9 @@ function triggerFoundationEffect(suit, rank, pileIndex) {
   if (rank === 'K') {
     triggerKingEffect(theme);
   }
+
+  // 5. 画面中央スーツ絵積み重ね演出
+  triggerSuitLayerReveal(suit, rank);
 }
 
 // --- 1. カードフラッシュ ---
@@ -270,3 +273,185 @@ function triggerKingEffect(theme) {
   board.classList.add('screen-shake');
   setTimeout(() => board.classList.remove('screen-shake'), 400);
 }
+
+// ============================================================
+//  スーツ絵積み重ね演出
+// ============================================================
+
+// スートごとの絵フォルダ名マッピング（ゲーム内スート名 → フォルダ名）
+const SUIT_FOLDER = {
+  spades:   'spade',
+  hearts:   'heart',
+  clubs:    'club',
+  diamonds: 'diamond',
+};
+
+// カードランクの順序（フォルダ内ファイル名と対応）
+const RANK_ORDER = ['A', '02', '03', '04', '05', '06', '07', '08', '09', '10', 'J', 'Q', 'K'];
+
+// ゲーム外ではファイル名が card_02.png のように2桁になることに注意
+// rank 値（'2'〜'10'）→ファイル名用文字列
+function rankToFileName(rank) {
+  if (rank === 'A' || rank === 'J' || rank === 'Q' || rank === 'K') return rank;
+  // 数値は2桁ゼロパディング
+  return String(parseInt(rank)).padStart(2, '0');
+}
+
+// スートごとの現在レイヤー状態を保持
+// { suit: { layerCount: N, hideTimer: timerId | null, overlayActive: bool } }
+const suitLayerState = {
+  spades:   { layerCount: 0, hideTimer: null, overlayActive: false },
+  hearts:   { layerCount: 0, hideTimer: null, overlayActive: false },
+  clubs:    { layerCount: 0, hideTimer: null, overlayActive: false },
+  diamonds: { layerCount: 0, hideTimer: null, overlayActive: false },
+};
+
+// ゲームリセット時に呼び出して状態をクリア
+function resetSuitLayers() {
+  const layersEl = document.getElementById('suit-reveal-layers');
+  if (layersEl) layersEl.innerHTML = '';
+
+  for (const suit of Object.keys(suitLayerState)) {
+    clearTimeout(suitLayerState[suit].hideTimer);
+    suitLayerState[suit].layerCount = 0;
+    suitLayerState[suit].hideTimer = null;
+    suitLayerState[suit].overlayActive = false;
+  }
+
+  const overlay = document.getElementById('suit-reveal-overlay');
+  if (overlay) {
+    overlay.className = 'suit-reveal-hidden';
+  }
+}
+
+/**
+ * ファウンデーションにカードが置かれたときにスーツ絵を積み上げる演出を発火
+ * @param {string} suit - 'spades' | 'hearts' | 'clubs' | 'diamonds'
+ * @param {string} rank - 'A' | '2' | ... | 'K'
+ */
+function triggerSuitLayerReveal(suit, rank) {
+  const overlay = document.getElementById('suit-reveal-overlay');
+  const layersEl = document.getElementById('suit-reveal-layers');
+  const labelEl = document.getElementById('suit-reveal-label');
+  if (!overlay || !layersEl || !labelEl) return;
+
+  const state = suitLayerState[suit];
+  const folder = SUIT_FOLDER[suit];
+  const theme = SUIT_THEMES[suit];
+  const fileRank = rankToFileName(rank);
+
+  // 前の自動消去タイマーをキャンセル（再表示で延長）
+  if (state.hideTimer) {
+    clearTimeout(state.hideTimer);
+    state.hideTimer = null;
+  }
+
+  // 現在別スートを表示中なら一旦隠す
+  const currentSuitAttr = overlay.dataset.currentSuit;
+  if (currentSuitAttr && currentSuitAttr !== suit) {
+    // 別スートのレイヤーが表示中 → 古いレイヤーを全削除して切り替え
+    layersEl.innerHTML = '';
+    // 別スートのlayerCountは保持したまま（その状態は残す）
+    // 今回のスートのlayerCountも保持（前回からの続き）
+  }
+
+  overlay.dataset.currentSuit = suit;
+
+  // レイヤーを追加（このカードまでのすべてのレイヤーを描画し直す）
+  // ただしすでに表示中なら新しいレイヤーだけ追加
+  const rankIndex = RANK_ORDER.indexOf(fileRank);
+  const targetLayerCount = rankIndex + 1; // 例: A=1, 02=2, ... K=13
+
+  if (!state.overlayActive || currentSuitAttr !== suit) {
+    // オーバーレイが非表示か別スートだった → このスートの全レイヤーを再描画
+    layersEl.innerHTML = '';
+
+    // 1〜targetLayerCount のレイヤーを追加
+    for (let i = 0; i < targetLayerCount; i++) {
+      const layerRank = RANK_ORDER[i];
+      const imgPath = `images/cards/${folder}/card_${layerRank}.png`;
+      const img = document.createElement('img');
+      img.className = 'suit-layer';
+      img.src = imgPath;
+      img.alt = `${suit} ${layerRank}`;
+      // 既存レイヤー（最新以外）はアニメーションなしで即表示
+      if (i < targetLayerCount - 1) {
+        img.style.animationDuration = '0s';
+        img.style.opacity = '1';
+        img.style.transform = 'translateY(0) scale(1)';
+      }
+      layersEl.appendChild(img);
+    }
+  } else {
+    // 同じスートの続き → 最新のレイヤーだけ追加
+    const imgPath = `images/cards/${folder}/card_${fileRank}.png`;
+    const img = document.createElement('img');
+    img.className = 'suit-layer';
+    img.src = imgPath;
+    img.alt = `${suit} ${rank}`;
+    layersEl.appendChild(img);
+  }
+
+  state.layerCount = targetLayerCount;
+  state.overlayActive = true;
+
+  // ラベルを更新
+  const rankMessages = {
+    'A':  `${theme.emoji} Ace`,
+    '02': `${theme.emoji} 2`,
+    '03': `${theme.emoji} 3`,
+    '04': `${theme.emoji} 4`,
+    '05': `${theme.emoji} 5`,
+    '06': `${theme.emoji} 6`,
+    '07': `${theme.emoji} 7`,
+    '08': `${theme.emoji} 8`,
+    '09': `${theme.emoji} 9`,
+    '10': `${theme.emoji} 10`,
+    'J':  `${theme.emoji} Jack`,
+    'Q':  `${theme.emoji} Queen`,
+    'K':  `${theme.emoji} King — Complete! 🎉`,
+  };
+  labelEl.textContent = rankMessages[fileRank] || `${theme.emoji} ${rank}`;
+  labelEl.style.color = theme.primary;
+
+  // オーバーレイをアクティブ化（CSSトランジションで表示）
+  overlay.classList.remove('suit-reveal-hidden');
+  // 1フレーム後にactiveクラスを付与（トランジション発火のため）
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      overlay.classList.add('suit-reveal-active');
+    });
+  });
+
+  // Kが完成したら長め表示 + card_all.pngを最上位に追加
+  const displayDuration = (rank === 'K') ? 4000 : 2200;
+
+  if (rank === 'K') {
+    // card_all.png（完成絵）を最上レイヤーとして追加
+    setTimeout(() => {
+      const allImg = document.createElement('img');
+      allImg.className = 'suit-layer';
+      allImg.src = `images/cards/${folder}/card_all.png`;
+      allImg.alt = `${suit} complete`;
+      allImg.style.filter =
+        `drop-shadow(0 0 20px ${theme.primary}) drop-shadow(0 0 40px ${theme.secondary})`;
+      layersEl.appendChild(allImg);
+    }, 400);
+  }
+
+  // 一定時間後に自動フェードアウト
+  state.hideTimer = setTimeout(() => {
+    overlay.classList.remove('suit-reveal-active');
+    overtime(() => {
+      overlay.classList.add('suit-reveal-hidden');
+      state.overlayActive = false;
+      state.hideTimer = null;
+    }, 350);
+  }, displayDuration);
+}
+
+// setTimeout のラッパー（オーバーレイフェードアウト後のクラス切り替え用）
+function overtime(fn, ms) {
+  return setTimeout(fn, ms);
+}
+
