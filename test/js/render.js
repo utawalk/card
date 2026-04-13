@@ -206,6 +206,10 @@ function showVictory() {
   const overlay = document.getElementById('victory-overlay');
   document.getElementById('final-score').textContent = `Score: ${GameState.score}`;
   document.getElementById('final-moves').textContent = `Moves: ${GameState.moves}`;
+
+  // 4スートの完成絵をセット（effects.jsのsetupVictoryArt）
+  if (typeof setupVictoryArt === 'function') setupVictoryArt();
+
   overlay.classList.remove('hidden');
 }
 

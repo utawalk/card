@@ -64,6 +64,8 @@ body {
   display: flex;
   justify-content: center;
   overflow: hidden; /* Prevent scrolling, game fits in viewport */
+  /* 背景画像が切り替わるときにクロスフェードする */
+  transition: background-image 0.8s ease;
 }
 
 #game-container {
@@ -73,6 +75,8 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  /* 背景が絵になっても読みやすいよう薄い暗幕をかける */
+  background: rgba(10, 15, 25, 0.42);
 }
 
 /* Header & Controls */
@@ -141,6 +145,27 @@ h1 {
 .btn.primary-btn:active {
   transform: translateY(1px);
   box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+/* ロビーへ戻るボタン */
+.btn.back-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--pile-border);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  padding: 7px 14px;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.btn.back-btn:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-main);
+  border-color: rgba(255,255,255,0.2);
+  transform: translateX(-2px);
 }
 
 /* オートファンデーションボタン */
@@ -394,13 +419,16 @@ h1 {
 
 .victory-modal {
   background: var(--surface-color);
-  padding: 40px;
-  border-radius: 16px;
+  padding: 32px 40px 40px;
+  border-radius: 20px;
   text-align: center;
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7),
+              0 0 60px rgba(212,175,55,0.12);
   transform: translateY(0) scale(1);
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  max-width: 90vw;
+  width: 700px;
 }
 
 .overlay.hidden .victory-modal {
@@ -409,7 +437,7 @@ h1 {
 
 .victory-modal h2 {
   font-size: 36px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   background: linear-gradient(to right, #fbbf24, #f59e0b);
   -webkit-background-clip: text;
   background-clip: text;
@@ -418,16 +446,97 @@ h1 {
 
 .victory-modal p {
   color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+/* ---- 完成した4枚の絵グリッド ---- */
+#victory-completed-art {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
   margin-bottom: 24px;
 }
+
+.victory-art-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: victory-art-pop 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.victory-art-card:nth-child(1) { animation-delay: 0.1s; }
+.victory-art-card:nth-child(2) { animation-delay: 0.22s; }
+.victory-art-card:nth-child(3) { animation-delay: 0.34s; }
+.victory-art-card:nth-child(4) { animation-delay: 0.46s; }
+
+@keyframes victory-art-pop {
+  0%   { opacity: 0; transform: translateY(16px) scale(0.85); }
+  70%  { opacity: 1; transform: translateY(-4px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.victory-art-card:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 20px rgba(212,175,55,0.2);
+}
+
+.victory-art-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  border-radius: 8px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+
+/* 途中段階の絵（完成していない場合）の見た目 */
+.victory-art-card.partial .victory-art-img {
+  opacity: 0.75;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)) saturate(0.7);
+}
+
+.victory-art-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* スートごとのアクセントカラー */
+.victory-art-card[data-suit="spades"]   { border-color: rgba(167, 139, 250, 0.3); }
+.victory-art-card[data-suit="hearts"]   { border-color: rgba(248, 113, 113, 0.3); }
+.victory-art-card[data-suit="clubs"]    { border-color: rgba(52,  211, 153, 0.3); }
+.victory-art-card[data-suit="diamonds"] { border-color: rgba(251, 191,  36, 0.3); }
+.victory-art-card[data-suit="spades"]   .victory-art-label { color: #a78bfa; }
+.victory-art-card[data-suit="hearts"]   .victory-art-label { color: #f87171; }
+.victory-art-card[data-suit="clubs"]    .victory-art-label { color: #34d399; }
+.victory-art-card[data-suit="diamonds"] .victory-art-label { color: #fbbf24; }
 
 .final-stats {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
   font-size: 18px;
   font-weight: 600;
+}
+
+/* モバイル: 2列グリッドに変える */
+@media (max-width: 600px) {
+  #victory-completed-art {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .victory-modal {
+    padding: 20px;
+    width: 92vw;
+  }
 }
 
 /* ============================================

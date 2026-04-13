@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Games — Premium Collection</title>
+  <meta name="description" content="プレミアムなトランプゲームコレクション。ソリティア、７ならべ、神経衰弱などをお楽しみください。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="lobby.css">
+</head>
+<body>
+  <!-- 浮遊するカードスーツのアンビエント背景 -->
+  <div id="ambient-layer" aria-hidden="true"></div>
+
+  <div id="lobby-container">
+    <!-- ヘッダー -->
+    <header class="lobby-header">
+      <div class="logo">
+        <span class="logo-suits" aria-hidden="true">♠ ♥ ♣ ♦</span>
+        <h1 class="logo-title">Card Games</h1>
+        <p class="logo-subtitle">Premium Collection</p>
+      </div>
+    </header>
+
+    <!-- ゲーム選択グリッド -->
+    <main class="game-grid-section">
+      <p class="section-hint">ゲームを選んでください</p>
+      <div class="game-grid" id="game-grid">
+
+        <!-- ソリティア（プレイ可能） -->
+        <a href="index.html" class="game-card available" id="game-solitaire" data-game="solitaire">
+          <div class="game-card-inner">
+            <div class="game-card-glow"></div>
+            <div class="game-card-icon">
+              <span class="suit-icon spade">♠</span>
+              <span class="suit-icon heart">♥</span>
+              <span class="suit-icon club">♣</span>
+              <span class="suit-icon diamond">♦</span>
+            </div>
+            <div class="game-card-info">
+              <h2 class="game-title">Solitaire</h2>
+              <p class="game-desc">1人用の定番カードゲーム。<br>トランプを順番に重ねてクリア！</p>
+              <div class="game-meta">
+                <span class="game-players">👤 1 Player</span>
+                <span class="game-difficulty">★★☆ Medium</span>
+              </div>
+            </div>
+            <div class="game-card-action">
+              <span class="play-btn">Play Now</span>
+              <span class="play-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- ７ならべ（近日公開） -->
+        <div class="game-card coming-soon" id="game-sevens" data-game="sevens">
+          <div class="game-card-inner">
+            <div class="game-card-icon">
+              <span class="suit-icon heart dimmed">♥</span>
+              <span class="big-num">7</span>
+            </div>
+            <div class="game-card-info">
+              <h2 class="game-title">７ならべ</h2>
+              <p class="game-desc">7のカードから順番に並べていく<br>みんなで楽しめるゲーム！</p>
+              <div class="game-meta">
+                <span class="game-players">👥 2〜4 Players</span>
+                <span class="game-difficulty">★☆☆ Easy</span>
+              </div>
+            </div>
+            <div class="game-card-action">
+              <span class="coming-badge">Coming Soon</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 神経衰弱（近日公開） -->
+        <div class="game-card coming-soon" id="game-memory" data-game="memory">
+          <div class="game-card-inner">
+            <div class="game-card-icon memory-icon">
+              <span class="mem-card front">♠</span>
+              <span class="mem-card back">?</span>
+            </div>
+            <div class="game-card-info">
+              <h2 class="game-title">神経衰弱</h2>
+              <p class="game-desc">伏せたカードを記憶して<br>同じ数字のペアを集めよう！</p>
+              <div class="game-meta">
+                <span class="game-players">👥 1〜4 Players</span>
+                <span class="game-difficulty">★★★ Hard</span>
+              </div>
+            </div>
+            <div class="game-card-action">
+              <span class="coming-badge">Coming Soon</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ババ抜き（近日公開） -->
+        <div class="game-card coming-soon" id="game-oldmaid" data-game="oldmaid">
+          <div class="game-card-inner">
+            <div class="game-card-icon">
+              <span class="suit-icon joker">🃏</span>
+            </div>
+            <div class="game-card-info">
+              <h2 class="game-title">ババ抜き</h2>
+              <p class="game-desc">ジョーカーを引かないように<br>上手くペアを揃えよう！</p>
+              <div class="game-meta">
+                <span class="game-players">👥 2〜6 Players</span>
+                <span class="game-difficulty">★☆☆ Easy</span>
+              </div>
+            </div>
+            <div class="game-card-action">
+              <span class="coming-badge">Coming Soon</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="lobby-footer">
+      <p>♠ ♥ ♣ ♦ &nbsp; Card Games Collection &nbsp; ♠ ♥ ♣ ♦</p>
+    </footer>
+  </div>
+
+  <script src="lobby.js"></script>
+</body>
+</html>
