@@ -122,11 +122,12 @@ function renderStock() {
     stockEl.classList.remove('empty');
     // Only render the top 3 cards physically to save DOM nodes in large piles
     const displayCount = Math.min(3, GameState.stock.length);
-    for (let i = GameState.stock.length - displayCount; i < GameState.stock.length; i++) {
-        const card = GameState.stock[i];
+    for (let j = 0; j < displayCount; j++) {
+        const cardIndex = GameState.stock.length - displayCount + j;
+        const card = GameState.stock[cardIndex];
         const cardEl = createCardElement(card);
-        // Slight stacking effect
-        cardEl.style.transform = `translate(${i * 1}px, ${i * -1}px)`;
+        // Stack each card slightly to the right and up (j=0 is bottom, j=displayCount-1 is top)
+        cardEl.style.transform = `translate(${j * 2}px, ${j * -2}px)`;
         stockEl.appendChild(cardEl);
     }
   }
@@ -205,6 +206,10 @@ function showVictory() {
   const overlay = document.getElementById('victory-overlay');
   document.getElementById('final-score').textContent = `Score: ${GameState.score}`;
   document.getElementById('final-moves').textContent = `Moves: ${GameState.moves}`;
+
+  // 4スートの完成絵をセット（effects.jsのsetupVictoryArt）
+  if (typeof setupVictoryArt === 'function') setupVictoryArt();
+
   overlay.classList.remove('hidden');
 }
 

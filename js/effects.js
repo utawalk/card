@@ -177,6 +177,9 @@ function triggerFoundationEffect(suit, rank, pileIndex) {
   if (rank === 'K') {
     triggerKingEffect(theme);
   }
+
+  // 5. 画面中央スーツ絵積み重ね演出
+  triggerSuitLayerReveal(suit, rank);
 }
 
 // --- 1. カードフラッシュ ---
@@ -269,4 +272,265 @@ function triggerKingEffect(theme) {
   const board = document.getElementById('board');
   board.classList.add('screen-shake');
   setTimeout(() => board.classList.remove('screen-shake'), 400);
+}
+
+// ============================================================
+//  スーツ絵積み重ね演出
+// ============================================================
+
+// スートごとの絵フォルダ名マッピング（ゲーム内スート名 → フォルダ名）
+const SUIT_FOLDER = {
+  spades:   'spade',
+  hearts:   'heart',
+  clubs:    'club',
+  diamonds: 'diamond',
+};
+
+// カードランクの順序（フォルダ内ファイル名と対応）
+const RANK_ORDER = ['A', '02', '03', '04', '05', '06', '07', '08', '09', '10', 'J', 'Q', 'K'];
+
+// ゲーム外ではファイル名が card_02.png のように2桁になることに注意
+// rank 値（'2'〜'10'）→ファイル名用文字列
+function rankToFileName(rank) {
+  if (rank === 'A' || rank === 'J' || rank === 'Q' || rank === 'K') return rank;
+  // 数値は2桁ゼロパディング
+  return String(parseInt(rank)).padStart(2, '0');
+}
+
+// スートごとの現在レイヤー状態を保持
+// { suit: { layerCount: N, hideTimer: timerId | null, overlayActive: bool, lastLayerImg: string|null } }
+const suitLayerState = {
+  spades:   { layerCount: 0, hideTimer: null, overlayActive: false, lastLayerImg: null },
+  hearts:   { layerCount: 0, hideTimer: null, overlayActive: false, lastLayerImg: null },
+  clubs:    { layerCount: 0, hideTimer: null, overlayActive: false, lastLayerImg: null },
+  diamonds: { layerCount: 0, hideTimer: null, overlayActive: false, lastLayerImg: null },
+};
+
+// ゲームリセット時に呼び出して状態をクリア
+function resetSuitLayers() {
+  const layersEl = document.getElementById('suit-reveal-layers');
+  if (layersEl) layersEl.innerHTML = '';
+
+  for (const suit of Object.keys(suitLayerState)) {
+    clearTimeout(suitLayerState[suit].hideTimer);
+    suitLayerState[suit].layerCount = 0;
+    suitLayerState[suit].hideTimer = null;
+    suitLayerState[suit].overlayActive = false;
+    suitLayerState[suit].lastLayerImg = null;  // 最新レイヤー画像パスをリセット
+  }
+
+  const overlay = document.getElementById('suit-reveal-overlay');
+  if (overlay) {
+    overlay.className = 'suit-reveal-hidden';
+  }
+
+  // 背景画像をデフォルトに戻す
+  updateGameBackground(null);
+}
+
+/**
+ * ファウンデーションにカードが置かれたときにスーツ絵を積み上げる演出を発火
+ * @param {string} suit - 'spades' | 'hearts' | 'clubs' | 'diamonds'
+ * @param {string} rank - 'A' | '2' | ... | 'K'
+ */
+function triggerSuitLayerReveal(suit, rank) {
+  const overlay = document.getElementById('suit-reveal-overlay');
+  const layersEl = document.getElementById('suit-reveal-layers');
+  const labelEl = document.getElementById('suit-reveal-label');
+  if (!overlay || !layersEl || !labelEl) return;
+
+  const state = suitLayerState[suit];
+  const folder = SUIT_FOLDER[suit];
+  const theme = SUIT_THEMES[suit];
+  const fileRank = rankToFileName(rank);
+
+  // 前の自動消去タイマーをキャンセル（再表示で延長）
+  if (state.hideTimer) {
+    clearTimeout(state.hideTimer);
+    state.hideTimer = null;
+  }
+
+  // 現在別スートを表示中なら一旦隠す
+  const currentSuitAttr = overlay.dataset.currentSuit;
+  if (currentSuitAttr && currentSuitAttr !== suit) {
+    // 別スートのレイヤーが表示中 → 古いレイヤーを全削除して切り替え
+    layersEl.innerHTML = '';
+    // 別スートのlayerCountは保持したまま（その状態は残す）
+    // 今回のスートのlayerCountも保持（前回からの続き）
+  }
+
+  overlay.dataset.currentSuit = suit;
+
+  // レイヤーを追加（このカードまでのすべてのレイヤーを描画し直す）
+  // ただしすでに表示中なら新しいレイヤーだけ追加
+  const rankIndex = RANK_ORDER.indexOf(fileRank);
+  const targetLayerCount = rankIndex + 1; // 例: A=1, 02=2, ... K=13
+
+  if (!state.overlayActive || currentSuitAttr !== suit) {
+    // オーバーレイが非表示か別スートだった → このスートの全レイヤーを再描画
+    layersEl.innerHTML = '';
+
+    // 1〜targetLayerCount のレイヤーを追加
+    for (let i = 0; i < targetLayerCount; i++) {
+      const layerRank = RANK_ORDER[i];
+      const imgPath = `images/cards/${folder}/card_${layerRank}.png`;
+      const img = document.createElement('img');
+      img.className = 'suit-layer';
+      img.src = imgPath;
+      img.alt = `${suit} ${layerRank}`;
+      // 既存レイヤー（最新以外）はアニメーションなしで即表示
+      if (i < targetLayerCount - 1) {
+        img.style.animationDuration = '0s';
+        img.style.opacity = '1';
+        img.style.transform = 'translateY(0) scale(1)';
+      }
+      layersEl.appendChild(img);
+    }
+  } else {
+    // 同じスートの続き → 最新のレイヤーだけ追加
+    const imgPath = `images/cards/${folder}/card_${fileRank}.png`;
+    const img = document.createElement('img');
+    img.className = 'suit-layer';
+    img.src = imgPath;
+    img.alt = `${suit} ${rank}`;
+    layersEl.appendChild(img);
+  }
+
+  state.layerCount = targetLayerCount;
+  state.overlayActive = true;
+
+  // 背景画像を最新レイヤーの画像に切り替える
+  const newBgImg = `images/cards/${folder}/card_${fileRank}.png`;
+  state.lastLayerImg = newBgImg;
+  updateGameBackground(newBgImg);
+
+  // ラベルを更新
+  const rankMessages = {
+    'A':  `${theme.emoji} Ace`,
+    '02': `${theme.emoji} 2`,
+    '03': `${theme.emoji} 3`,
+    '04': `${theme.emoji} 4`,
+    '05': `${theme.emoji} 5`,
+    '06': `${theme.emoji} 6`,
+    '07': `${theme.emoji} 7`,
+    '08': `${theme.emoji} 8`,
+    '09': `${theme.emoji} 9`,
+    '10': `${theme.emoji} 10`,
+    'J':  `${theme.emoji} Jack`,
+    'Q':  `${theme.emoji} Queen`,
+    'K':  `${theme.emoji} King — Complete! 🎉`,
+  };
+  labelEl.textContent = rankMessages[fileRank] || `${theme.emoji} ${rank}`;
+  labelEl.style.color = theme.primary;
+
+  // オーバーレイをアクティブ化（CSSトランジションで表示）
+  overlay.classList.remove('suit-reveal-hidden');
+  // 1フレーム後にactiveクラスを付与（トランジション発火のため）
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      overlay.classList.add('suit-reveal-active');
+    });
+  });
+
+  // Kが完成したら長め表示 + card_all.pngを最上位に追加
+  const displayDuration = (rank === 'K') ? 4000 : 2200;
+
+  if (rank === 'K') {
+    // card_all.png（完成絵）を最上レイヤーとして追加し、背景も切り替える
+    setTimeout(() => {
+      const allImg = document.createElement('img');
+      allImg.className = 'suit-layer';
+      allImg.src = `images/cards/${folder}/card_all.png`;
+      allImg.alt = `${suit} complete`;
+      allImg.style.filter =
+        `drop-shadow(0 0 20px ${theme.primary}) drop-shadow(0 0 40px ${theme.secondary})`;
+      layersEl.appendChild(allImg);
+      // 背景も card_all.png に山!
+      const allPath = `images/cards/${folder}/card_all.png`;
+      state.lastLayerImg = allPath;
+      updateGameBackground(allPath);
+    }, 400);
+  }
+
+  // 一定時間後に自動フェードアウト
+  state.hideTimer = setTimeout(() => {
+    overlay.classList.remove('suit-reveal-active');
+    overtime(() => {
+      overlay.classList.add('suit-reveal-hidden');
+      state.overlayActive = false;
+      state.hideTimer = null;
+    }, 350);
+  }, displayDuration);
+}
+
+// setTimeout のラッパー（オーバーレイフェードアウト後のクラス切り替え用）
+function overtime(fn, ms) {
+  return setTimeout(fn, ms);
+}
+
+// ============================================================
+//  ゲーム背景の動的更新
+// ============================================================
+
+/**
+ * ゲームの背景画像を指定のURLに変更する。
+ * null を渡すとデフォルト背景（background_01.png）に戻す。
+ * @param {string|null} imgUrl
+ */
+function updateGameBackground(imgUrl) {
+  const body = document.body;
+  if (!imgUrl) {
+    body.style.backgroundImage = "url('images/background_01.png')";
+    body.style.backgroundSize = 'cover';
+    body.style.backgroundPosition = 'center';
+    return;
+  }
+  // 新しい画像をプリロードして切り替える（ちらつき防止）
+  const img = new Image();
+  img.onload = () => {
+    body.style.backgroundImage = `url('${imgUrl}')`;
+    body.style.backgroundSize = 'cover';
+    body.style.backgroundPosition = 'center';
+    body.style.backgroundRepeat = 'no-repeat';
+    // 少し暗めのオーバーレイはCSSの既存 #game-container が担う（変更不要）
+  };
+  img.src = imgUrl;
+}
+
+// ============================================================
+//  勝利画面の完成絵セットアップ
+// ============================================================
+
+// スーツの順序（index.htmlの4枚に対応）
+const SUITS_ORDER = ['spades', 'hearts', 'clubs', 'diamonds'];
+
+/**
+ * 勝利画面を表示する前に4スートの「最良の絵」をセットする。
+ * Kまで完成していれば card_all.png、途中なら最新レイヤー、
+ * 1枚も置いていなければ空（非表示）。
+ */
+function setupVictoryArt() {
+  SUITS_ORDER.forEach(suit => {
+    const cardEl = document.querySelector(`#victory-completed-art .victory-art-card[data-suit="${suit}"]`);
+    if (!cardEl) return;
+
+    const state = suitLayerState[suit];
+    const folder = SUIT_FOLDER[suit];
+    const imgEl = cardEl.querySelector('.victory-art-img');
+
+    if (state.layerCount === 0) {
+      // 1枚も置いていない（通常は全スート完成しているはずだが念のため）
+      imgEl.src = `images/cards/${folder}/card_all.png`;
+      cardEl.classList.remove('partial');
+    } else if (state.layerCount >= 13) {
+      // K（13枚）まで完成 → card_all.png
+      imgEl.src = `images/cards/${folder}/card_all.png`;
+      cardEl.classList.remove('partial');
+    } else {
+      // 途中段階 → 最新レイヤー画像
+      const latestRank = RANK_ORDER[state.layerCount - 1];
+      imgEl.src = `images/cards/${folder}/card_${latestRank}.png`;
+      cardEl.classList.add('partial');
+    }
+  });
 }

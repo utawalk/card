@@ -139,6 +139,7 @@ function startNewGame() {
   clearHint();
   clearTimeout(deadlockCheckTimer);
   clearTimeout(autoFoundationTimer);
+  if (typeof resetSuitLayers === 'function') resetSuitLayers();
   dealGame();
   renderBoard();
   if (autoFoundationEnabled) scheduleAutoFoundation();

@@ -9,6 +9,7 @@
 <body>
   <div id="game-container">
     <header class="game-header">
+      <a href="lobby.html" class="btn back-btn" id="back-to-lobby-btn" title="ゲーム一覧に戻る">← Games</a>
       <h1>Solitaire</h1>
       <div class="controls">
         <button id="new-game-btn" class="btn primary-btn">New Game</button>
@@ -58,6 +59,25 @@
       <div class="victory-modal">
         <h2>You Won! 🎉</h2>
         <p>Congratulations! You've successfully cleared the game.</p>
+        <!-- 完成した4枚の絵 -->
+        <div id="victory-completed-art">
+          <div class="victory-art-card" data-suit="spades">
+            <img class="victory-art-img" src="" alt="Spades complete">
+            <div class="victory-art-label">♠ Spades</div>
+          </div>
+          <div class="victory-art-card" data-suit="hearts">
+            <img class="victory-art-img" src="" alt="Hearts complete">
+            <div class="victory-art-label">♥ Hearts</div>
+          </div>
+          <div class="victory-art-card" data-suit="clubs">
+            <img class="victory-art-img" src="" alt="Clubs complete">
+            <div class="victory-art-label">♣ Clubs</div>
+          </div>
+          <div class="victory-art-card" data-suit="diamonds">
+            <img class="victory-art-img" src="" alt="Diamonds complete">
+            <div class="victory-art-label">♦ Diamonds</div>
+          </div>
+        </div>
         <div class="final-stats">
           <span id="final-score">Score: 0</span>
           <span id="final-moves">Moves: 0</span>
@@ -71,6 +91,15 @@
 
     <!-- キング完成グロー用オーバーレイ -->
     <div id="king-glow-overlay"></div>
+
+    <!-- スーツ絵完成演出オーバーレイ -->
+    <div id="suit-reveal-overlay" class="suit-reveal-hidden">
+      <div id="suit-reveal-bg"></div>
+      <div id="suit-reveal-frame">
+        <div id="suit-reveal-layers"></div>
+        <div id="suit-reveal-label"></div>
+      </div>
+    </div>
 
     <!-- 手詰まり告知オーバーレイ -->
     <div id="deadlock-overlay" class="overlay hidden">
