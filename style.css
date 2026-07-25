@@ -120,6 +120,14 @@ h1 {
   border: 1px solid var(--pile-border);
 }
 
+/* コイン所持数バッジ */
+.stat-coin {
+  color: var(--primary-color) !important;
+  font-weight: 700;
+  border-color: rgba(212, 175, 55, 0.4) !important;
+  background: rgba(212, 175, 55, 0.08) !important;
+}
+
 .btn {
   padding: 8px 16px;
   border-radius: 6px;
@@ -393,8 +401,9 @@ h1 {
 /*
   カードの内部要素はすべて images/cards/ フォルダの画像で描画されます。
   スキンを変えたい場合は同じファイル名でフォルダ内の画像を差し替えてください。
-  命名規則: {suit}_{rank}.svg  （例: hearts_A.svg, spades_10.svg）
-  裏面:     back.svg
+  構成: images/cards/{スート名}/{ランク}.png
+        （例: images/cards/hearts/A.png, images/cards/spades/10.png）
+  裏面: images/cards/back.png
 */
 
 
@@ -525,6 +534,57 @@ h1 {
   margin-bottom: 28px;
   font-size: 18px;
   font-weight: 600;
+}
+
+/* 勝利画面のコイン獲得表示 */
+.victory-coins-earned {
+  margin-bottom: 18px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-shadow: 0 0 12px rgba(212,175,55,0.4);
+}
+
+/* 勝利画面のアクション（Play Again + ロビーに戻る） */
+.victory-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 小さめのロビーに戻るリンク（Play Againより控えめに） */
+.btn.back-btn.small {
+  font-size: 11px;
+  padding: 5px 12px;
+  opacity: 0.75;
+}
+
+.btn.back-btn.small:hover {
+  opacity: 1;
+}
+
+/* 新記録バッジ */
+.victory-new-record {
+  margin-bottom: 16px;
+  padding: 10px 20px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.08));
+  border: 1px solid rgba(212,175,55,0.5);
+  color: #f5d060;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-align: center;
+  text-shadow: 0 0 16px rgba(212,175,55,0.7);
+  box-shadow: 0 0 24px rgba(212,175,55,0.2), inset 0 0 12px rgba(212,175,55,0.05);
+  animation: record-badge-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes record-badge-pop {
+  0%   { opacity: 0; transform: scale(0.7) translateY(8px); }
+  70%  { opacity: 1; transform: scale(1.06) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1)    translateY(0); }
 }
 
 /* モバイル: 2列グリッドに変える */

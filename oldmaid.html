@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ババ抜き — Card Games</title>
+  <meta name="description" content="ババ抜きカードゲーム。ジョーカーを引かないよう上手くペアを揃えよう！CPU3人との対戦。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="lobby.css">
+  <link rel="stylesheet" href="oldmaid.css">
+</head>
+<body>
+  <div id="oldmaid-container">
+
+    <!-- ヘッダー -->
+    <header class="om-header">
+      <a href="lobby.html" class="om-back-btn" id="om-back-btn">← Games</a>
+      <div class="om-title-area">
+        <h1 class="om-title">ババ抜き</h1>
+        <span class="om-subtitle">Old Maid</span>
+      </div>
+      <div class="coin-badge" id="coin-badge">
+        <span class="coin-icon">🪙</span>
+        <span class="coin-amount" id="coin-amount">0</span>
+      </div>
+      <div id="turn-indicator" class="turn-indicator" aria-live="polite"></div>
+      <button id="new-game-btn" class="om-new-btn">New Game</button>
+    </header>
+
+    <!-- CPU3人エリア -->
+    <div class="cpu-area">
+
+      <div class="cpu-panel" data-player="1" id="cpu-panel-1">
+        <div class="cpu-panel-top">
+          <span class="cpu-avatar">🤖</span>
+          <div class="cpu-info">
+            <span class="cpu-name">CPU 1</span>
+            <span class="cpu-count" id="cpu-count-1">— 枚</span>
+          </div>
+          <span class="cpu-status-badge" id="cpu-status-1"></span>
+        </div>
+        <div class="cpu-backs" id="cpu-backs-1"></div>
+      </div>
+
+      <div class="cpu-panel" data-player="2" id="cpu-panel-2">
+        <div class="cpu-panel-top">
+          <span class="cpu-avatar">🤖</span>
+          <div class="cpu-info">
+            <span class="cpu-name">CPU 2</span>
+            <span class="cpu-count" id="cpu-count-2">— 枚</span>
+          </div>
+          <span class="cpu-status-badge" id="cpu-status-2"></span>
+        </div>
+        <div class="cpu-backs" id="cpu-backs-2"></div>
+      </div>
+
+      <div class="cpu-panel" data-player="3" id="cpu-panel-3">
+        <div class="cpu-panel-top">
+          <span class="cpu-avatar">🤖</span>
+          <div class="cpu-info">
+            <span class="cpu-name">CPU 3</span>
+            <span class="cpu-count" id="cpu-count-3">— 枚</span>
+          </div>
+          <span class="cpu-status-badge" id="cpu-status-3"></span>
+        </div>
+        <div class="cpu-backs" id="cpu-backs-3"></div>
+      </div>
+
+    </div>
+
+    <!-- 引くエリア（人間のターンのみ表示） -->
+    <div id="draw-area" class="draw-area hidden" role="region" aria-label="カードを引くエリア">
+      <p class="draw-title" id="draw-title">カードを1枚選んでください</p>
+      <div id="drawable-cards" class="drawable-cards"></div>
+    </div>
+
+    <!-- メッセージバー -->
+    <div id="message-bar" class="message-bar" aria-live="polite"></div>
+
+    <!-- プレイヤー手札 -->
+    <div id="player-area" class="player-area">
+      <div class="player-info-bar">
+        <span class="player-icon">👤</span>
+        <span class="player-you-label">あなたの手札</span>
+        <span class="player-count" id="player-count">— 枚</span>
+      </div>
+      <div class="hand-scroll">
+        <div id="player-hand" class="player-hand"></div>
+      </div>
+    </div>
+
+    <!-- 結果オーバーレイ -->
+    <div id="result-overlay" class="result-overlay hidden" role="dialog" aria-modal="true" aria-label="ゲーム結果">
+      <div class="result-modal">
+        <div class="result-icon" id="result-icon">🎉</div>
+        <h2 class="result-title" id="result-title">あなたの勝ち！</h2>
+        <p class="result-sub" id="result-sub"></p>
+        <div class="result-ranking" id="result-ranking"></div>
+        <div id="result-coins" class="result-coins"></div>
+        <button id="result-play-again-btn" class="result-btn-primary">もう一度プレイ</button>
+        <a href="lobby.html" class="result-lobby-link">ロビーへ戻る</a>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/save.js"></script>
+  <script src="oldmaid.js"></script>
+</body>
+</html>

@@ -1,0 +1,845 @@
+/* ======================================================
+   sevens.css — 七並べ Game
+   ====================================================== */
+
+/* ---- ページ全体 ---- */
+#sevens-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(13, 17, 23, 0.55);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* 場に出た絵が徐々に重なって見える背景（ソリティアと同じ演出） */
+body {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background-image 0.8s ease;
+}
+
+/* ---- カラーユーティリティ ---- */
+.spade-color   { color: var(--spade);   }
+.heart-color   { color: var(--heart);   }
+.club-color    { color: var(--club);    }
+.diamond-color { color: var(--diamond); }
+
+/* ======================================================
+   Header
+   ====================================================== */
+
+.sevens-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  background: rgba(13, 17, 23, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-wrap: nowrap;
+}
+
+.sevens-back-btn {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  transition: color 0.2s, background 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+.sevens-back-btn:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.08);
+  transform: translateX(-2px);
+}
+
+.sevens-title-area {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.sevens-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(16px, 3vw, 22px);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+
+.sevens-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ターンインジケーター */
+.turn-indicator {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  transition: background 0.3s, color 0.3s;
+}
+.turn-indicator.my-turn {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  animation: pulse-green 1.5s ease-in-out infinite;
+}
+.turn-indicator.cpu-turn {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--text-sub);
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0.15); }
+}
+
+/* New Game ボタン */
+.sevens-new-btn {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--gold);
+  background: rgba(212,175,55,0.1);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+.sevens-new-btn:hover {
+  background: rgba(212,175,55,0.2);
+  border-color: rgba(212,175,55,0.55);
+  transform: translateY(-1px);
+}
+
+/* ======================================================
+   Opponents
+   ====================================================== */
+
+.opponents-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.25);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.cpu-panel {
+  flex: 1;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 10px 12px 8px;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* 現在のターン */
+.cpu-panel.is-current {
+  background: rgba(212,175,55,0.08);
+  border-color: rgba(212,175,55,0.35);
+  box-shadow: 0 4px 20px rgba(212,175,55,0.12);
+}
+.cpu-panel.is-current::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  animation: scan 1.5s ease-in-out infinite;
+}
+@keyframes scan {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  50%  { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+/* 脱落 */
+.cpu-panel.eliminated {
+  opacity: 0.4;
+  filter: grayscale(0.6);
+}
+
+/* 上がり */
+.cpu-panel.finished {
+  border-color: rgba(212,175,55,0.3);
+  background: rgba(212,175,55,0.05);
+}
+
+/* 思考中アニメーション */
+.cpu-panel.thinking {
+  animation: thinking-pulse 0.35s ease;
+}
+@keyframes thinking-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.03); }
+}
+
+.cpu-panel-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.cpu-avatar {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.cpu-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cpu-name {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+.cpu-stats {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.cpu-card-count,
+.cpu-pass-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.cpu-status {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 48px;
+  text-align: right;
+}
+
+/* CPU ミニカード裏面 */
+.cpu-card-backs {
+  position: relative;
+  height: 28px;
+  overflow: visible;
+}
+
+.cpu-back-card {
+  position: absolute;
+  top: 0;
+  width: 20px;
+  height: 28px;
+  border-radius: 3px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  transition: filter 0.3s;
+}
+
+/* ======================================================
+   Board
+   ====================================================== */
+
+.board-section {
+  flex: 1;
+  padding: 12px 14px 8px;
+  overflow-x: auto;
+}
+
+#sevens-board {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 680px;
+}
+
+.suit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.suit-label {
+  width: 30px;
+  flex-shrink: 0;
+  font-size: 22px;
+  text-align: center;
+  filter: drop-shadow(0 0 6px currentColor);
+  line-height: 1;
+}
+
+.card-slots {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+/* カードスロット */
+.card-slot {
+  flex: 1;
+  max-width: 64px;
+  aspect-ratio: 5 / 7;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s, transform 0.2s;
+  overflow: hidden;
+}
+
+/* 空スロット — ランクラベル */
+.slot-lbl {
+  font-size: clamp(9px, 1.2vw, 13px);
+  font-weight: 700;
+  color: rgba(255,255,255,0.12);
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+/* フロンティアスロット（次に置ける位置）*/
+.card-slot.frontier {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.04);
+}
+.card-slot.frontier .slot-lbl {
+  color: rgba(255,255,255,0.35);
+}
+
+/* 配置済みスロット */
+.card-slot.placed {
+  border-color: transparent;
+  background: transparent;
+}
+
+/* 7のカード（中心） */
+.card-slot.is-seven {
+  box-shadow: 0 0 10px rgba(212,175,55,0.4);
+  border-color: rgba(212,175,55,0.5);
+}
+
+/* スーツごとのフロンティアカラー */
+.suit-row[data-suit="spades"]   .card-slot.frontier { border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.04); }
+.suit-row[data-suit="hearts"]   .card-slot.frontier { border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.04); }
+.suit-row[data-suit="clubs"]    .card-slot.frontier { border-color: rgba( 52,211,153,0.4); background: rgba( 52,211,153,0.04); }
+.suit-row[data-suit="diamonds"] .card-slot.frontier { border-color: rgba(251,191, 36,0.4); background: rgba(251,191, 36,0.04); }
+
+/* 置いたカード画像 */
+.board-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 5px;
+}
+
+/* 新規配置アニメーション */
+.card-slot.just-placed {
+  animation: slot-pop 0.35s var(--ease-spring) both;
+}
+@keyframes slot-pop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ======================================================
+   Player Area
+   ====================================================== */
+
+.player-area {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  background: rgba(0,0,0,0.2);
+  padding: 10px 14px 14px;
+  transition: opacity 0.3s;
+}
+
+.player-area.disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.player-area.eliminated {
+  opacity: 0.4;
+}
+
+.player-info-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.player-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-icon {
+  font-size: 18px;
+}
+
+.player-you-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+.passes-remaining {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* パスボタン */
+.pass-btn {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 7px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid rgba(248,113,113,0.35);
+  background: rgba(248,113,113,0.1);
+  color: #f87171;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s, opacity 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pass-btn:hover:not(:disabled) {
+  background: rgba(248,113,113,0.22);
+  border-color: rgba(248,113,113,0.6);
+  transform: translateY(-1px);
+}
+.pass-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.pass-btn.pass-zero {
+  border-color: rgba(255,255,255,0.1);
+  color: var(--text-muted);
+  background: transparent;
+}
+
+/* 手札スクロールラッパー */
+.hand-scroll-wrap {
+  overflow-x: auto;
+  padding-bottom: 4px;
+  /* スクロールバーを薄く */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.hand-scroll-wrap::-webkit-scrollbar { height: 4px; }
+.hand-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
+.hand-scroll-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+
+/* 手札コンテナ */
+.hand-cards {
+  display: flex;
+  gap: 6px;
+  padding: 4px 2px;
+  min-height: 100px;
+}
+
+/* 手札の各カード */
+.hand-card {
+  flex-shrink: 0;
+  width: 64px;
+  aspect-ratio: 5 / 7;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: default;
+  border: 2px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  transition: transform 0.25s var(--ease-spring),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease,
+              opacity 0.25s ease,
+              filter 0.25s ease;
+  position: relative;
+}
+
+.hand-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  border-radius: 6px;
+}
+
+/* プレイ可能なカード */
+.hand-card.playable {
+  cursor: pointer;
+  border-color: var(--gold);
+  box-shadow: 0 0 16px rgba(212,175,55,0.4), 0 4px 12px rgba(0,0,0,0.4);
+  animation: playable-glow 1.8s ease-in-out infinite alternate;
+}
+@keyframes playable-glow {
+  from { box-shadow: 0 0 10px rgba(212,175,55,0.3), 0 4px 12px rgba(0,0,0,0.4); }
+  to   { box-shadow: 0 0 24px rgba(212,175,55,0.6), 0 4px 16px rgba(0,0,0,0.5); }
+}
+.hand-card.playable:hover {
+  transform: translateY(-10px) scale(1.08);
+  box-shadow: 0 16px 36px rgba(212,175,55,0.45), 0 0 28px rgba(212,175,55,0.35);
+  z-index: 10;
+}
+.hand-card.playable:active {
+  transform: translateY(-5px) scale(1.03);
+  transition-duration: 0.1s;
+}
+
+/* プレイ不可なカード */
+.hand-card.unplayable {
+  opacity: 0.45;
+  filter: grayscale(0.4);
+}
+
+/* 新規カード配布アニメーション */
+.hand-card.deal-in {
+  animation: deal-in 0.4s var(--ease-spring) both;
+}
+@keyframes deal-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.85); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ======================================================
+   Result Overlay
+   ====================================================== */
+
+.result-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.result-overlay:not(.hidden) {
+  opacity: 1;
+  pointer-events: all;
+}
+.result-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.result-modal {
+  background: rgba(20, 24, 33, 0.98);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 36px 40px 32px;
+  width: min(480px, 90vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.75);
+  animation: modal-pop 0.45s var(--ease-spring) both;
+}
+@keyframes modal-pop {
+  from { transform: scale(0.82) translateY(24px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.result-icon {
+  font-size: 56px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+}
+
+.result-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(20px, 5vw, 28px);
+  font-weight: 900;
+  text-align: center;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.result-sub {
+  font-size: 13px;
+  color: var(--text-sub);
+  text-align: center;
+  letter-spacing: 0.3px;
+  margin-top: -8px;
+}
+
+/* ランキング */
+.result-coins {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+  text-shadow: 0 0 10px rgba(212,175,55,0.35);
+}
+
+.result-ranking {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ranking-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-size: 13px;
+}
+.ranking-row.you {
+  background: rgba(212,175,55,0.1);
+  border-color: rgba(212,175,55,0.3);
+}
+
+.rk-pos {
+  font-weight: 700;
+  min-width: 52px;
+  font-size: 14px;
+}
+.rk-name {
+  flex: 1;
+  color: var(--text);
+  font-weight: 600;
+}
+.rk-pass {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ボタン */
+.play-again-btn {
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 12px 36px;
+  border-radius: 14px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  border: none;
+  color: #0d1117;
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s, filter 0.2s;
+  box-shadow: 0 4px 20px rgba(212,175,55,0.35);
+}
+.play-again-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 28px rgba(212,175,55,0.5);
+  filter: brightness(1.1);
+}
+
+.result-lobby-link {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+.result-lobby-link:hover {
+  color: var(--text-sub);
+}
+
+/* ======================================================
+   Responsive
+   ====================================================== */
+
+@media (max-width: 520px) {
+  .sevens-header {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .sevens-subtitle { display: none; }
+
+  .coin-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .coin-badge .coin-icon { font-size: 12px; }
+
+  .opponents-row {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .cpu-panel {
+    padding: 8px 8px 6px;
+  }
+
+  .cpu-avatar { font-size: 15px; }
+  .cpu-name   { font-size: 11px; }
+
+  .board-section {
+    padding: 10px 10px 6px;
+  }
+
+  .suit-label { font-size: 18px; width: 24px; }
+
+  .hand-card { width: 52px; }
+
+  .player-area { padding: 8px 10px 12px; }
+
+  .result-modal { padding: 28px 24px 24px; }
+}
+
+
+/* ============================================
+   スーツ絵完成演出オーバーレイ（ソリティアと共通の見た目）
+   ============================================ */
+
+#suit-reveal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#suit-reveal-overlay.suit-reveal-hidden {
+  opacity: 0;
+}
+
+#suit-reveal-overlay.suit-reveal-active {
+  opacity: 1;
+}
+
+#suit-reveal-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center,
+    rgba(10, 15, 30, 0.78) 0%,
+    rgba(5, 8, 18, 0.55) 60%,
+    transparent 100%
+  );
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+#suit-reveal-overlay.suit-reveal-active #suit-reveal-bg {
+  opacity: 1;
+}
+
+#suit-reveal-frame {
+  position: relative;
+  width: 340px;
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.6);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              opacity 0.35s ease;
+}
+
+#suit-reveal-overlay.suit-reveal-active #suit-reveal-frame {
+  transform: scale(1);
+  opacity: 1;
+}
+
+#suit-reveal-layers {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+
+.suit-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  animation: suit-layer-in 0.55s ease-out forwards;
+  filter: drop-shadow(0 0 14px rgba(255,255,255,0.2));
+}
+
+@keyframes suit-layer-in {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.95); }
+  60%  { opacity: 1; transform: translateY(-3px)  scale(1.03); }
+  100% { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+#suit-reveal-label {
+  position: absolute;
+  bottom: -48px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow:
+    0 0 20px currentColor,
+    0 0 40px currentColor,
+    0 2px 6px rgba(0,0,0,0.9);
+  opacity: 0;
+}
+
+#suit-reveal-overlay.suit-reveal-active #suit-reveal-label {
+  animation: label-pop 0.5s 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes label-pop {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.7); }
+  70%  { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+}

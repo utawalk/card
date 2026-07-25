@@ -2,24 +2,28 @@
 
 // ============================================================
 //  Card Image Configuration
-//  スキン差し替え時はこの変数だけ変更すればOK
+//  スート別フォルダの中の A001_card サブフォルダに1枚ずつPNGを配置する構成。
+//  画像を差し替えたいときは images/cards/{スート名}/A001_card/{ランク}.png を
+//  同じファイル名のまま上書きするだけでOK（コード変更不要）。
+//  例: images/cards/spades/A001_card/A.png, images/cards/hearts/A001_card/10.png
 // ============================================================
 const CARD_IMAGE_DIR = 'images/cards';       // カード画像フォルダ
-const CARD_IMAGE_EXT = '.svg';               // 画像拡張子（.png, .jpg, .webp にも変更可）
-const CARD_BACK_FILE = 'back';               // 裏面ファイル名（拡張子なし）
+const CARD_FACE_SUBDIR = 'A001_card';        // 表面画像のサブフォルダ名
+const CARD_IMAGE_EXT = '.png';               // 画像拡張子（.png, .jpg, .webp にも変更可）
+const CARD_BACK_FILE = 'back';               // 裏面ファイル名（拡張子なし、images/cards/直下）
 
 /**
  * カードの表面画像URLを返す
  * @param {Card} card
- * @returns {string} 例: "images/cards/hearts_A.svg"
+ * @returns {string} 例: "images/cards/hearts/A001_card/A.png"
  */
 function getCardFaceUrl(card) {
-  return `${CARD_IMAGE_DIR}/${card.suit}_${card.rank}${CARD_IMAGE_EXT}`;
+  return `${CARD_IMAGE_DIR}/${card.suit}/${CARD_FACE_SUBDIR}/${card.rank}${CARD_IMAGE_EXT}`;
 }
 
 /**
  * カードの裏面画像URLを返す
- * @returns {string} 例: "images/cards/back.svg"
+ * @returns {string} 例: "images/cards/back.png"
  */
 function getCardBackUrl() {
   return `${CARD_IMAGE_DIR}/${CARD_BACK_FILE}${CARD_IMAGE_EXT}`;
@@ -200,6 +204,15 @@ function renderTableau() {
 function updateStats() {
   document.getElementById('score-display').textContent = `Score: ${GameState.score}`;
   document.getElementById('moves-display').textContent = `Moves: ${GameState.moves}`;
+  updateCoinDisplay();
+}
+
+/** ヘッダーのコイン所持数表示を更新する */
+function updateCoinDisplay() {
+  const el = document.getElementById('coin-amount');
+  if (el && typeof Wallet_getCoins === 'function') {
+    el.textContent = Wallet_getCoins().toLocaleString();
+  }
 }
 
 function showVictory() {
@@ -207,7 +220,47 @@ function showVictory() {
   document.getElementById('final-score').textContent = `Score: ${GameState.score}`;
   document.getElementById('final-moves').textContent = `Moves: ${GameState.moves}`;
 
-  // 4スートの完成絵をセット（effects.jsのsetupVictoryArt）
+  // ---- セーブ処理 ----
+  let newHighScore  = false;
+  let newBestMoves  = false;
+  if (typeof Solitaire_onGameWin === 'function') {
+    const result = Solitaire_onGameWin(GameState.score, GameState.moves);
+    newHighScore = result.newHighScore;
+    newBestMoves = result.newBestMoves;
+
+    // ---- コイン獲得表示 ----
+    const coinsEl = document.getElementById('victory-coins-earned');
+    if (coinsEl) {
+      coinsEl.textContent = `🪙 +${result.coinsEarned} コイン獲得！（所持: ${result.coinsTotal.toLocaleString()}）`;
+    }
+    updateCoinDisplay();
+  }
+
+  // ---- 新記録バッジ ----
+  // 既存バッジを削除してから再生成
+  const existingBadge = document.getElementById('victory-new-record');
+  if (existingBadge) existingBadge.remove();
+
+  if (newHighScore || newBestMoves) {
+    const badge = document.createElement('div');
+    badge.id = 'victory-new-record';
+    badge.className = 'victory-new-record';
+
+    const lines = [];
+    if (newHighScore) lines.push('🏆 New High Score!');
+    if (newBestMoves) lines.push('⚡ Best Moves!');
+    badge.textContent = lines.join('  ');
+
+    // final-stats の前に挿入
+    const finalStats = document.querySelector('.final-stats');
+    if (finalStats) {
+      finalStats.parentNode.insertBefore(badge, finalStats);
+    } else {
+      document.querySelector('.victory-modal').appendChild(badge);
+    }
+  }
+
+  // ---- 4スートの完成絵をセット ----
   if (typeof setupVictoryArt === 'function') setupVictoryArt();
 
   overlay.classList.remove('hidden');

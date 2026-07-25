@@ -17,6 +17,10 @@
   <div id="lobby-container">
     <!-- ヘッダー -->
     <header class="lobby-header">
+      <div class="coin-badge" id="coin-badge">
+        <span class="coin-icon">🪙</span>
+        <span class="coin-amount" id="coin-amount">0</span>
+      </div>
       <div class="logo">
         <span class="logo-suits" aria-hidden="true">♠ ♥ ♣ ♦</span>
         <h1 class="logo-title">Card Games</h1>
@@ -46,6 +50,21 @@
                 <span class="game-players">👤 1 Player</span>
                 <span class="game-difficulty">★★☆ Medium</span>
               </div>
+              <!-- セーブデータ表示 -->
+              <div class="game-save-stats" id="solitaire-save-stats">
+                <div class="save-stat">
+                  <span class="save-stat-label">🏆 High Score</span>
+                  <span class="save-stat-value" id="stat-high-score">—</span>
+                </div>
+                <div class="save-stat">
+                  <span class="save-stat-label">⚡ Best Moves</span>
+                  <span class="save-stat-value" id="stat-best-moves">—</span>
+                </div>
+                <div class="save-stat">
+                  <span class="save-stat-label">✅ Wins</span>
+                  <span class="save-stat-value" id="stat-wins">—</span>
+                </div>
+              </div>
             </div>
             <div class="game-card-action">
               <span class="play-btn">Play Now</span>
@@ -54,70 +73,111 @@
           </div>
         </a>
 
-        <!-- ７ならべ（近日公開） -->
-        <div class="game-card coming-soon" id="game-sevens" data-game="sevens">
+        <!-- ７ならべ（プレイ可能） -->
+        <a href="sevens.html" class="game-card available" id="game-sevens" data-game="sevens">
           <div class="game-card-inner">
+            <div class="game-card-glow"></div>
             <div class="game-card-icon">
-              <span class="suit-icon heart dimmed">♥</span>
+              <span class="suit-icon heart">♥</span>
               <span class="big-num">7</span>
             </div>
             <div class="game-card-info">
               <h2 class="game-title">７ならべ</h2>
-              <p class="game-desc">7のカードから順番に並べていく<br>みんなで楽しめるゲーム！</p>
+              <p class="game-desc">7のカードから順番に並べていく<br>CPU 3 人との対戦ゲーム！</p>
               <div class="game-meta">
-                <span class="game-players">👥 2〜4 Players</span>
+                <span class="game-players">🤖 vs CPU ×3</span>
                 <span class="game-difficulty">★☆☆ Easy</span>
               </div>
             </div>
             <div class="game-card-action">
-              <span class="coming-badge">Coming Soon</span>
+              <span class="play-btn">Play Now</span>
+              <span class="play-arrow">→</span>
             </div>
           </div>
-        </div>
+        </a>
 
-        <!-- 神経衰弱（近日公開） -->
-        <div class="game-card coming-soon" id="game-memory" data-game="memory">
+        <!-- 神経衰弱（プレイ可能） -->
+        <a href="memory.html" class="game-card available" id="game-memory" data-game="memory">
           <div class="game-card-inner">
+            <div class="game-card-glow"></div>
             <div class="game-card-icon memory-icon">
               <span class="mem-card front">♠</span>
               <span class="mem-card back">?</span>
             </div>
             <div class="game-card-info">
               <h2 class="game-title">神経衰弱</h2>
-              <p class="game-desc">伏せたカードを記憶して<br>同じ数字のペアを集めよう！</p>
+              <p class="game-desc">伏せたカードを記憶して<br>同じランクのペアをすべて集めよう！</p>
               <div class="game-meta">
-                <span class="game-players">👥 1〜4 Players</span>
-                <span class="game-difficulty">★★★ Hard</span>
+                <span class="game-players">👤 1 Player</span>
+                <span class="game-difficulty">★★☆ Normal</span>
               </div>
             </div>
             <div class="game-card-action">
-              <span class="coming-badge">Coming Soon</span>
+              <span class="play-btn">Play Now</span>
+              <span class="play-arrow">→</span>
             </div>
           </div>
-        </div>
+        </a>
 
-        <!-- ババ抜き（近日公開） -->
-        <div class="game-card coming-soon" id="game-oldmaid" data-game="oldmaid">
+        <!-- ババ抜き（プレイ可能） -->
+        <a href="oldmaid.html" class="game-card available" id="game-oldmaid" data-game="oldmaid">
           <div class="game-card-inner">
+            <div class="game-card-glow"></div>
             <div class="game-card-icon">
               <span class="suit-icon joker">🃏</span>
             </div>
             <div class="game-card-info">
               <h2 class="game-title">ババ抜き</h2>
-              <p class="game-desc">ジョーカーを引かないように<br>上手くペアを揃えよう！</p>
+              <p class="game-desc">ジョーカーを引かないよう<br>CPU 3 人と対戦しよう！</p>
               <div class="game-meta">
-                <span class="game-players">👥 2〜6 Players</span>
+                <span class="game-players">🤖 vs CPU ×3</span>
                 <span class="game-difficulty">★☆☆ Easy</span>
               </div>
             </div>
             <div class="game-card-action">
-              <span class="coming-badge">Coming Soon</span>
+              <span class="play-btn">Play Now</span>
+              <span class="play-arrow">→</span>
             </div>
           </div>
-        </div>
+        </a>
+
+        <!-- ポーカー（プレイ可能） -->
+        <a href="poker.html" class="game-card available" id="game-poker" data-game="poker">
+          <div class="game-card-inner">
+            <div class="game-card-glow"></div>
+            <div class="game-card-icon">
+              <span class="suit-icon spade" style="font-size:1.5em">♠</span>
+              <span class="suit-icon heart" style="font-size:1.1em;margin-top:2px">♥</span>
+            </div>
+            <div class="game-card-info">
+              <h2 class="game-title">ポーカー</h2>
+              <p class="game-desc">テキサスホールデム。<br>CPU 3 人とチップを賭けて戦おう！</p>
+              <div class="game-meta">
+                <span class="game-players">🤖 vs CPU ×3</span>
+                <span class="game-difficulty">★★★ Hard</span>
+              </div>
+            </div>
+            <div class="game-card-action">
+              <span class="play-btn">Play Now</span>
+              <span class="play-arrow">→</span>
+            </div>
+          </div>
+        </a>
 
       </div>
     </main>
+
+    <!-- コレクション / ユーティリティ リンク -->
+    <nav class="collection-nav">
+      <a href="deck.html" class="collection-link" id="link-deck">
+        <span class="collection-link-icon">🎴</span>
+        <span class="collection-link-text">
+          <span class="collection-link-title">カード一覧</span>
+          <span class="collection-link-sub">4スート × 13 枚 + 完成絵 — カードギャラリーを見る</span>
+        </span>
+        <span class="collection-link-arrow">→</span>
+      </a>
+    </nav>
 
     <!-- フッター -->
     <footer class="lobby-footer">
@@ -125,6 +185,7 @@
     </footer>
   </div>
 
+  <script src="js/save.js"></script>
   <script src="lobby.js"></script>
 </body>
 </html>

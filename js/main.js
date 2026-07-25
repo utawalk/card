@@ -142,6 +142,8 @@ function startNewGame() {
   if (typeof resetSuitLayers === 'function') resetSuitLayers();
   dealGame();
   renderBoard();
+  // ゲーム開始を記録（プレイ回数インクリメント）
+  if (typeof Solitaire_onGameStart === 'function') Solitaire_onGameStart();
   if (autoFoundationEnabled) scheduleAutoFoundation();
 }
 

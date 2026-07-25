@@ -1,0 +1,688 @@
+/* ======================================================
+   poker.css — テキサスホールデム ポーカー
+   ====================================================== */
+
+/* ---- ページ全体 ---- */
+#poker-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ======================================================
+   Header
+   ====================================================== */
+.pk-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  background: rgba(13, 17, 23, 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-wrap: nowrap;
+}
+
+.pk-back-btn {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  transition: color 0.2s, background 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+.pk-back-btn:hover { color: var(--text); background: rgba(255,255,255,0.09); transform: translateX(-2px); }
+
+.pk-title-area { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+.pk-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(16px, 3vw, 22px);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.pk-subtitle { font-size: 10px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; }
+
+.phase-badge {
+  flex: 1;
+  text-align: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--gold);
+  padding: 5px 14px;
+  border-radius: 20px;
+  background: rgba(212,175,55,0.1);
+  border: 1px solid rgba(212,175,55,0.25);
+  text-transform: uppercase;
+}
+
+.pk-new-btn {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--gold);
+  background: rgba(212,175,55,0.1);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  white-space: nowrap;
+}
+.pk-new-btn:hover { background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.55); transform: translateY(-1px); }
+
+/* ======================================================
+   Table Wrap
+   ====================================================== */
+.table-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ======================================================
+   Poker Table (Green Felt)
+   ====================================================== */
+.poker-table {
+  flex: 1;
+  background: radial-gradient(ellipse at 50% 60%, #1e4d2b 0%, #163520 55%, #0d2015 100%);
+  border-bottom: 3px solid rgba(212,175,55,0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 14px 16px 10px;
+}
+
+/* ======================================================
+   CPU Panels
+   ====================================================== */
+.cpu-row {
+  display: flex;
+  gap: 10px;
+}
+
+.cpu-panel {
+  flex: 1;
+  min-width: 0;
+  background: rgba(0,0,0,0.35);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 10px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* アクション中 */
+.cpu-panel.acting {
+  border-color: rgba(139,92,246,0.6);
+  background: rgba(139,92,246,0.1);
+}
+.cpu-panel.acting::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+  animation: scan 1.4s ease-in-out infinite;
+}
+@keyframes scan {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  50%  { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+/* フォールド */
+.cpu-panel.folded { opacity: 0.38; filter: grayscale(0.7); }
+
+/* 勝者 */
+.cpu-panel.winner {
+  border-color: rgba(212,175,55,0.7);
+  box-shadow: 0 0 24px rgba(212,175,55,0.35);
+  animation: winner-glow 1s ease-in-out 3;
+}
+@keyframes winner-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(212,175,55,0.25); }
+  50%       { box-shadow: 0 0 36px rgba(212,175,55,0.6); }
+}
+
+/* Dealer chip */
+.cpu-panel.is-dealer .cpu-name::after {
+  content: ' D';
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--gold);
+  background: rgba(212,175,55,0.2);
+  border: 1px solid rgba(212,175,55,0.5);
+  border-radius: 50%;
+  padding: 0 4px;
+  margin-left: 4px;
+}
+
+.cpu-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cpu-avatar { font-size: 18px; flex-shrink: 0; }
+.cpu-info { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.cpu-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.cpu-chips {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: 'Orbitron', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+}
+
+.cpu-action-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  min-width: 52px;
+  text-align: center;
+  transition: background 0.3s, color 0.3s;
+}
+.cpu-action-badge.fold-badge  { background: rgba(248,113,113,0.15); color: #f87171; }
+.cpu-action-badge.call-badge  { background: rgba(52,211,153,0.15);  color: #34d399; }
+.cpu-action-badge.raise-badge { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+.cpu-action-badge.check-badge { background: rgba(160,174,192,0.12); color: #a0aec0; }
+
+/* CPU の穴カード */
+.cpu-hole-cards {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+.cpu-card-slot {
+  width: 38px;
+  aspect-ratio: 5 / 7;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.3);
+}
+.cpu-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.cpu-card-img.flip-in { animation: flip-reveal 0.5s ease both; }
+@keyframes flip-reveal {
+  0%   { opacity: 0; transform: rotateY(90deg) scale(0.8); }
+  60%  { transform: rotateY(-8deg) scale(1.04); }
+  100% { opacity: 1; transform: rotateY(0deg) scale(1); }
+}
+
+.cpu-hand-name {
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--gold);
+  min-height: 14px;
+}
+
+/* ======================================================
+   Community Cards + Pot
+   ====================================================== */
+.community-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.community-cards {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.comm-slot {
+  width: 60px;
+  aspect-ratio: 5 / 7;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.25);
+  position: relative;
+}
+.comm-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.02);
+}
+.comm-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  animation: deal-in 0.4s var(--ease-spring) both;
+}
+@keyframes deal-in {
+  from { opacity: 0; transform: translateY(-20px) scale(0.8) rotate(-5deg); }
+  to   { opacity: 1; transform: none; }
+}
+
+.pot-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 12px;
+}
+.pot-label-text {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.pot-amount {
+  font-family: 'Orbitron', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+/* ======================================================
+   Message
+   ====================================================== */
+.pk-message {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.3px;
+  padding: 4px 16px;
+  min-height: 22px;
+  transition: all 0.2s;
+}
+.pk-message.pop { animation: msg-pop 0.3s var(--ease-spring) both; }
+@keyframes msg-pop {
+  0%   { transform: scale(0.96); opacity: 0.6; }
+  60%  { transform: scale(1.02); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+/* ======================================================
+   Player Section
+   ====================================================== */
+.player-section {
+  background: rgba(0,0,0,0.25);
+  border-top: 2px solid rgba(212,175,55,0.15);
+  padding: 10px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.player-id { display: flex; align-items: center; gap: 6px; }
+.player-avatar { font-size: 18px; }
+.player-label { font-size: 12px; font-weight: 700; color: var(--text); }
+.player-chip-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(212,175,55,0.1);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 20px;
+}
+.chip-icon-sm { font-size: 14px; }
+.player-chips-num {
+  font-family: 'Orbitron', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+
+.bet-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: rgba(251,191,36,0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251,191,36,0.3);
+  display: none;
+}
+.bet-tag.visible { display: inline-block; }
+
+.hand-name-wrap {
+  flex: 1;
+  text-align: right;
+}
+.hand-name-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  /* base */
+}
+.hand-name-text.rank-0 { color: #8b98b8; }
+.hand-name-text.rank-1 { color: #34d399; }
+.hand-name-text.rank-2 { color: #34d399; }
+.hand-name-text.rank-3 { color: #fbbf24; }
+.hand-name-text.rank-4 { color: #fbbf24; }
+.hand-name-text.rank-5 { color: #f97316; }
+.hand-name-text.rank-6 { color: #f97316; }
+.hand-name-text.rank-7 { color: #e879f9; }
+.hand-name-text.rank-8 { color: #e879f9; background: rgba(232,121,249,0.1); }
+.hand-name-text.rank-9 { color: var(--gold); background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); }
+
+/* プレイヤー手札 */
+.player-hole-row {
+  display: flex;
+  gap: 10px;
+}
+.player-card-slot {
+  width: 80px;
+  aspect-ratio: 5 / 7;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.03);
+}
+.player-card-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 9px;
+}
+.player-card-slot img.best-card {
+  box-shadow: 0 0 16px rgba(212,175,55,0.5), 0 0 6px rgba(212,175,55,0.3);
+  border: 2px solid rgba(212,175,55,0.7);
+}
+
+/* ======================================================
+   Action Panel
+   ====================================================== */
+.action-panel {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.act-btn {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s, filter 0.2s, opacity 0.2s;
+}
+.act-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+.act-btn:not(:disabled):hover { transform: translateY(-2px); }
+.act-btn:not(:disabled):active { transform: translateY(0) scale(0.97); }
+
+.fold-btn {
+  background: rgba(248,113,113,0.12);
+  border: 1.5px solid rgba(248,113,113,0.35);
+  color: #f87171;
+}
+.fold-btn:not(:disabled):hover {
+  background: rgba(248,113,113,0.22);
+  border-color: rgba(248,113,113,0.6);
+  box-shadow: 0 6px 20px rgba(248,113,113,0.25);
+}
+
+.call-btn {
+  flex: 1;
+  background: rgba(52,211,153,0.12);
+  border: 1.5px solid rgba(52,211,153,0.35);
+  color: #34d399;
+}
+.call-btn:not(:disabled):hover {
+  background: rgba(52,211,153,0.22);
+  border-color: rgba(52,211,153,0.6);
+  box-shadow: 0 6px 20px rgba(52,211,153,0.25);
+}
+
+.raise-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.raise-btn {
+  background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(212,175,55,0.15));
+  border: 1.5px solid rgba(212,175,55,0.45);
+  color: var(--gold);
+}
+.raise-btn:not(:disabled):hover {
+  background: linear-gradient(135deg, rgba(251,191,36,0.35), rgba(212,175,55,0.25));
+  border-color: rgba(212,175,55,0.7);
+  box-shadow: 0 6px 20px rgba(212,175,55,0.3);
+}
+
+/* レイズ金額コントロール */
+.raise-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 8px;
+  padding: 3px 8px;
+  border: 1px solid rgba(212,175,55,0.2);
+}
+.raise-adj {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+.raise-adj:hover { transform: scale(1.25); }
+.raise-display {
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fbbf24;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* ======================================================
+   Result Overlay
+   ====================================================== */
+.result-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.result-overlay:not(.hidden) { opacity: 1; pointer-events: all; }
+.result-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.result-modal {
+  background: rgba(18, 22, 30, 0.98);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 26px;
+  padding: 38px 44px 34px;
+  width: min(480px, 90vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.75),
+              0 0 60px rgba(212,175,55,0.06);
+  animation: result-pop 0.5s var(--ease-spring) both;
+}
+@keyframes result-pop {
+  from { transform: scale(0.8) translateY(28px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);    opacity: 1; }
+}
+
+.result-icon { font-size: 56px; line-height: 1; }
+.result-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(22px, 5vw, 30px);
+  font-weight: 900;
+  text-align: center;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.result-sub { font-size: 13px; color: var(--text-sub); text-align: center; margin-top: -6px; }
+.result-coins {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+  text-shadow: 0 0 10px rgba(212,175,55,0.35);
+}
+
+.result-chips-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+.rchip-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 13px;
+}
+.rchip-badge.you { background: rgba(212,175,55,0.1); border-color: rgba(212,175,55,0.3); }
+.rchip-name { color: var(--text-muted); }
+.rchip-val { font-weight: 700; color: var(--gold); font-family: 'Orbitron', monospace; font-size: 14px; }
+
+.result-btn-primary {
+  width: 100%;
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 13px 24px;
+  border-radius: 14px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  border: none;
+  color: #0d1117;
+  box-shadow: 0 4px 20px rgba(212,175,55,0.35);
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+}
+.result-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(212,175,55,0.5); filter: brightness(1.08); }
+.result-lobby-link { font-size: 12px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+.result-lobby-link:hover { color: var(--text-sub); }
+
+/* ======================================================
+   Human waiting pulse
+   ====================================================== */
+.player-section.my-turn .player-hole-row {
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+@keyframes pulse-border {
+  0%, 100% {}
+  50% { filter: drop-shadow(0 0 6px rgba(52,211,153,0.4)); }
+}
+
+/* ======================================================
+   Winner overlay for hand result
+   ====================================================== */
+.hand-result-bar {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  padding: 6px;
+  animation: gold-in 0.45s var(--ease-spring) both;
+}
+@keyframes gold-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ======================================================
+   Responsive
+   ====================================================== */
+@media (max-width: 560px) {
+  .pk-header { padding: 8px 12px; gap: 8px; }
+  .pk-subtitle { display: none; }
+  .coin-badge { padding: 4px 8px; font-size: 11px; gap: 4px; }
+  .coin-badge .coin-icon { font-size: 12px; }
+  .cpu-panel { padding: 8px 9px 6px; }
+  .cpu-avatar { font-size: 15px; }
+  .cpu-card-slot { width: 30px; }
+  .community-cards { gap: 4px; }
+  .comm-slot { width: 48px; }
+  .pot-info { padding: 6px 12px; }
+  .pot-amount { font-size: 16px; }
+  .player-section { padding: 8px 12px 10px; }
+  .player-card-slot { width: 62px; }
+  .action-panel { gap: 6px; }
+  .act-btn { padding: 9px 14px; font-size: 12px; }
+  .result-modal { padding: 28px 22px 24px; }
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>神経衰弱 — Card Games</title>
+  <meta name="description" content="神経衰弱カードゲーム。伏せたカードを記憶して同じランクのペアをすべて見つけよう！">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="lobby.css">
+  <link rel="stylesheet" href="memory.css">
+</head>
+<body>
+  <div id="memory-container">
+
+    <!-- ヘッダー -->
+    <header class="memory-header">
+      <a href="lobby.html" class="memory-back-btn" id="memory-back-btn">← Games</a>
+      <div class="memory-title-area">
+        <h1 class="memory-title">神経衰弱</h1>
+        <span class="memory-subtitle">Memory</span>
+      </div>
+      <div class="coin-badge" id="coin-badge">
+        <span class="coin-icon">🪙</span>
+        <span class="coin-amount" id="coin-amount">0</span>
+      </div>
+      <!-- ゲーム中のみ表示 -->
+      <div id="header-stats" class="header-stats hidden">
+        <div class="hstat">
+          <span class="hstat-label">⏱</span>
+          <span class="hstat-value" id="timer-display">00:00</span>
+        </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat">
+          <span class="hstat-label">ペア</span>
+          <span class="hstat-value" id="pairs-display">0 / 0</span>
+        </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat">
+          <span class="hstat-label">手数</span>
+          <span class="hstat-value" id="moves-display">0</span>
+        </div>
+      </div>
+      <button id="quit-game-btn" class="memory-quit-btn hidden">やめる</button>
+    </header>
+
+    <!-- 難易度選択画面 -->
+    <div id="difficulty-screen" class="difficulty-screen">
+      <p class="diff-prompt">難易度を選んでください</p>
+      <div class="diff-row">
+
+        <!-- EASY -->
+        <button class="diff-card diff-easy" data-diff="easy">
+          <div class="diff-icon">🌱</div>
+          <div class="diff-name">EASY</div>
+          <div class="diff-jp">かんたん</div>
+          <div class="diff-count"><strong>16</strong> 枚</div>
+          <div class="diff-detail">4スート × 4ランク</div>
+          <div class="diff-preview" id="preview-easy"></div>
+          <div class="diff-records">
+            <div class="drec">
+              <span class="drec-l">⏱ 最速</span>
+              <span class="drec-v" id="best-time-easy">—</span>
+            </div>
+            <div class="drec">
+              <span class="drec-l">👆 最少手</span>
+              <span class="drec-v" id="best-moves-easy">—</span>
+            </div>
+          </div>
+        </button>
+
+        <!-- NORMAL -->
+        <button class="diff-card diff-normal" data-diff="normal">
+          <div class="diff-icon">⭐</div>
+          <div class="diff-name">NORMAL</div>
+          <div class="diff-jp">ふつう</div>
+          <div class="diff-count"><strong>32</strong> 枚</div>
+          <div class="diff-detail">4スート × 8ランク</div>
+          <div class="diff-preview" id="preview-normal"></div>
+          <div class="diff-records">
+            <div class="drec">
+              <span class="drec-l">⏱ 最速</span>
+              <span class="drec-v" id="best-time-normal">—</span>
+            </div>
+            <div class="drec">
+              <span class="drec-l">👆 最少手</span>
+              <span class="drec-v" id="best-moves-normal">—</span>
+            </div>
+          </div>
+        </button>
+
+        <!-- HARD -->
+        <button class="diff-card diff-hard" data-diff="hard">
+          <div class="diff-icon">🔥</div>
+          <div class="diff-name">HARD</div>
+          <div class="diff-jp">むずかしい</div>
+          <div class="diff-count"><strong>52</strong> 枚</div>
+          <div class="diff-detail">4スート × 13ランク（全部）</div>
+          <div class="diff-preview" id="preview-hard"></div>
+          <div class="diff-records">
+            <div class="drec">
+              <span class="drec-l">⏱ 最速</span>
+              <span class="drec-v" id="best-time-hard">—</span>
+            </div>
+            <div class="drec">
+              <span class="drec-l">👆 最少手</span>
+              <span class="drec-v" id="best-moves-hard">—</span>
+            </div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div id="game-screen" class="game-screen hidden">
+      <div id="card-grid" class="card-grid"></div>
+    </div>
+
+    <!-- 結果オーバーレイ -->
+    <div id="result-overlay" class="result-overlay hidden" role="dialog" aria-modal="true" aria-label="ゲーム結果">
+      <div class="result-modal">
+        <div class="result-fireworks">🎊</div>
+        <h2 class="result-title" id="result-title">クリア！</h2>
+        <div class="result-diff-badge" id="result-diff-badge">EASY</div>
+
+        <div class="result-stats-row">
+          <div class="rstat">
+            <div class="rstat-label">タイム</div>
+            <div class="rstat-value" id="result-time">00:00</div>
+            <div class="rstat-badge" id="result-time-badge"></div>
+          </div>
+          <div class="rstat-divider"></div>
+          <div class="rstat">
+            <div class="rstat-label">手数</div>
+            <div class="rstat-value" id="result-moves">0 手</div>
+            <div class="rstat-badge" id="result-moves-badge"></div>
+          </div>
+        </div>
+
+        <div class="result-bests">
+          <div class="rbest">
+            <span class="rbest-label">⏱ ベストタイム</span>
+            <span class="rbest-value" id="result-best-time">—</span>
+          </div>
+          <div class="rbest">
+            <span class="rbest-label">👆 ベスト手数</span>
+            <span class="rbest-value" id="result-best-moves">—</span>
+          </div>
+        </div>
+
+        <div id="result-coins" class="result-coins"></div>
+
+        <div class="result-actions">
+          <button id="result-play-again-btn" class="rbtn rbtn-primary">もう一度</button>
+          <button id="result-change-diff-btn" class="rbtn rbtn-secondary">難易度変更</button>
+        </div>
+        <a href="lobby.html" class="result-lobby-link">ロビーへ戻る</a>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/save.js"></script>
+  <script src="memory.js"></script>
+</body>
+</html>

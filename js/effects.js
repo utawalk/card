@@ -278,23 +278,20 @@ function triggerKingEffect(theme) {
 //  スーツ絵積み重ね演出
 // ============================================================
 
-// スートごとの絵フォルダ名マッピング（ゲーム内スート名 → フォルダ名）
-const SUIT_FOLDER = {
-  spades:   'spade',
-  hearts:   'heart',
-  clubs:    'club',
-  diamonds: 'diamond',
-};
+// 絵合わせ素材のサブフォルダ名（images/cards/{スート}/A001_pitc/ 配下）
+const SUIT_PIC_SUBDIR = 'A001_pitc';
 
-// カードランクの順序（フォルダ内ファイル名と対応）
-const RANK_ORDER = ['A', '02', '03', '04', '05', '06', '07', '08', '09', '10', 'J', 'Q', 'K'];
+// カードランクの順序（ファイル名は A.png, 2.png, ..., 10.png, J.png, Q.png, K.png）
+const RANK_ORDER = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-// ゲーム外ではファイル名が card_02.png のように2桁になることに注意
-// rank 値（'2'〜'10'）→ファイル名用文字列
+// ランク値をそのままファイル名として使う（ゼロパディングなし）
 function rankToFileName(rank) {
-  if (rank === 'A' || rank === 'J' || rank === 'Q' || rank === 'K') return rank;
-  // 数値は2桁ゼロパディング
-  return String(parseInt(rank)).padStart(2, '0');
+  return rank;
+}
+
+// images/cards/{スート}/A001_pitc/{ランク}.png のパスを返す
+function suitPicPath(suit, fileRank) {
+  return `images/cards/${suit}/${SUIT_PIC_SUBDIR}/${fileRank}.png`;
 }
 
 // スートごとの現在レイヤー状態を保持
@@ -340,7 +337,6 @@ function triggerSuitLayerReveal(suit, rank) {
   if (!overlay || !layersEl || !labelEl) return;
 
   const state = suitLayerState[suit];
-  const folder = SUIT_FOLDER[suit];
   const theme = SUIT_THEMES[suit];
   const fileRank = rankToFileName(rank);
 
@@ -373,7 +369,7 @@ function triggerSuitLayerReveal(suit, rank) {
     // 1〜targetLayerCount のレイヤーを追加
     for (let i = 0; i < targetLayerCount; i++) {
       const layerRank = RANK_ORDER[i];
-      const imgPath = `images/cards/${folder}/card_${layerRank}.png`;
+      const imgPath = suitPicPath(suit, layerRank);
       const img = document.createElement('img');
       img.className = 'suit-layer';
       img.src = imgPath;
@@ -388,7 +384,7 @@ function triggerSuitLayerReveal(suit, rank) {
     }
   } else {
     // 同じスートの続き → 最新のレイヤーだけ追加
-    const imgPath = `images/cards/${folder}/card_${fileRank}.png`;
+    const imgPath = suitPicPath(suit, fileRank);
     const img = document.createElement('img');
     img.className = 'suit-layer';
     img.src = imgPath;
@@ -399,22 +395,26 @@ function triggerSuitLayerReveal(suit, rank) {
   state.layerCount = targetLayerCount;
   state.overlayActive = true;
 
-  // 背景画像を最新レイヤーの画像に切り替える
-  const newBgImg = `images/cards/${folder}/card_${fileRank}.png`;
-  state.lastLayerImg = newBgImg;
-  updateGameBackground(newBgImg);
+  // 背景画像を「これまで揃った絵をすべて重ねた状態」に更新する
+  // （1枚だけでなく、A〜現在のランクまでの全レイヤーを重ねて表示する）
+  const bgLayers = [];
+  for (let i = 0; i < targetLayerCount; i++) {
+    bgLayers.push(suitPicPath(suit, RANK_ORDER[i]));
+  }
+  state.lastLayerImg = bgLayers[bgLayers.length - 1];
+  updateGameBackground(bgLayers);
 
   // ラベルを更新
   const rankMessages = {
     'A':  `${theme.emoji} Ace`,
-    '02': `${theme.emoji} 2`,
-    '03': `${theme.emoji} 3`,
-    '04': `${theme.emoji} 4`,
-    '05': `${theme.emoji} 5`,
-    '06': `${theme.emoji} 6`,
-    '07': `${theme.emoji} 7`,
-    '08': `${theme.emoji} 8`,
-    '09': `${theme.emoji} 9`,
+    '2':  `${theme.emoji} 2`,
+    '3':  `${theme.emoji} 3`,
+    '4':  `${theme.emoji} 4`,
+    '5':  `${theme.emoji} 5`,
+    '6':  `${theme.emoji} 6`,
+    '7':  `${theme.emoji} 7`,
+    '8':  `${theme.emoji} 8`,
+    '9':  `${theme.emoji} 9`,
     '10': `${theme.emoji} 10`,
     'J':  `${theme.emoji} Jack`,
     'Q':  `${theme.emoji} Queen`,
@@ -432,23 +432,23 @@ function triggerSuitLayerReveal(suit, rank) {
     });
   });
 
-  // Kが完成したら長め表示 + card_all.pngを最上位に追加
+  // Kが完成したら長め表示 + all.pngを最上位に追加
   const displayDuration = (rank === 'K') ? 4000 : 2200;
 
   if (rank === 'K') {
-    // card_all.png（完成絵）を最上レイヤーとして追加し、背景も切り替える
+    // all.png（完成絵）を最上レイヤーとして追加し、背景も切り替える
     setTimeout(() => {
       const allImg = document.createElement('img');
       allImg.className = 'suit-layer';
-      allImg.src = `images/cards/${folder}/card_all.png`;
+      allImg.src = suitPicPath(suit, 'all');
       allImg.alt = `${suit} complete`;
       allImg.style.filter =
         `drop-shadow(0 0 20px ${theme.primary}) drop-shadow(0 0 40px ${theme.secondary})`;
       layersEl.appendChild(allImg);
-      // 背景も card_all.png に山!
-      const allPath = `images/cards/${folder}/card_all.png`;
+      // 背景も完成絵 all.png に統一する
+      const allPath = suitPicPath(suit, 'all');
       state.lastLayerImg = allPath;
-      updateGameBackground(allPath);
+      updateGameBackground([allPath]);
     }, 400);
   }
 
@@ -473,28 +473,42 @@ function overtime(fn, ms) {
 // ============================================================
 
 /**
- * ゲームの背景画像を指定のURLに変更する。
- * null を渡すとデフォルト背景（background_01.png）に戻す。
- * @param {string|null} imgUrl
+ * ゲームの背景画像を更新する。
+ * これまで揃ったカードの絵を「重ねた状態」で背景に表示するため、
+ * 画像URLの配列（下から上に重ねる順＝A→現在のランクの順）を受け取る。
+ * null または空配列を渡すとデフォルト背景（background_01.png）に戻す。
+ * @param {string[]|string|null} imgUrls - 画像URLの配列。互換のため単一文字列も許容。
  */
-function updateGameBackground(imgUrl) {
+function updateGameBackground(imgUrls) {
   const body = document.body;
-  if (!imgUrl) {
+
+  // 後方互換: 文字列1枚だけ渡された場合は配列に変換
+  if (typeof imgUrls === 'string') imgUrls = [imgUrls];
+
+  if (!imgUrls || imgUrls.length === 0) {
     body.style.backgroundImage = "url('images/background_01.png')";
     body.style.backgroundSize = 'cover';
     body.style.backgroundPosition = 'center';
+    body.style.backgroundRepeat = 'no-repeat';
     return;
   }
-  // 新しい画像をプリロードして切り替える（ちらつき防止）
-  const img = new Image();
-  img.onload = () => {
-    body.style.backgroundImage = `url('${imgUrl}')`;
+
+  // 全レイヤーをプリロードしてから一括で切り替える（ちらつき・絵の欠け防止）
+  Promise.all(imgUrls.map(src => new Promise(resolve => {
+    const img = new Image();
+    img.onload  = resolve;
+    img.onerror = resolve; // 一部の読み込みに失敗しても全体を止めない
+    img.src = src;
+  }))).then(() => {
+    // CSSの複数背景は「先頭ほど手前（上）」に重なる仕様のため、
+    // 配列を逆順にして「後から揃えたカードほど上に重なる」ようにする
+    const layered = imgUrls.slice().reverse().map(src => `url('${src}')`).join(', ');
+    body.style.backgroundImage = layered;
     body.style.backgroundSize = 'cover';
     body.style.backgroundPosition = 'center';
     body.style.backgroundRepeat = 'no-repeat';
     // 少し暗めのオーバーレイはCSSの既存 #game-container が担う（変更不要）
-  };
-  img.src = imgUrl;
+  });
 }
 
 // ============================================================
@@ -515,21 +529,20 @@ function setupVictoryArt() {
     if (!cardEl) return;
 
     const state = suitLayerState[suit];
-    const folder = SUIT_FOLDER[suit];
     const imgEl = cardEl.querySelector('.victory-art-img');
 
     if (state.layerCount === 0) {
       // 1枚も置いていない（通常は全スート完成しているはずだが念のため）
-      imgEl.src = `images/cards/${folder}/card_all.png`;
+      imgEl.src = suitPicPath(suit, 'all');
       cardEl.classList.remove('partial');
     } else if (state.layerCount >= 13) {
-      // K（13枚）まで完成 → card_all.png
-      imgEl.src = `images/cards/${folder}/card_all.png`;
+      // K（13枚）まで完成 → all.png
+      imgEl.src = suitPicPath(suit, 'all');
       cardEl.classList.remove('partial');
     } else {
       // 途中段階 → 最新レイヤー画像
       const latestRank = RANK_ORDER[state.layerCount - 1];
-      imgEl.src = `images/cards/${folder}/card_${latestRank}.png`;
+      imgEl.src = suitPicPath(suit, latestRank);
       cardEl.classList.add('partial');
     }
   });

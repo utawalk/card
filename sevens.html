@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>七並べ — Card Games</title>
+  <meta name="description" content="七並べカードゲーム。7のカードを起点に順番にカードを並べていく1対3のCPU対戦ゲームです。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="lobby.css">
+  <link rel="stylesheet" href="sevens.css">
+</head>
+<body>
+  <div id="sevens-container">
+
+    <!-- ヘッダー -->
+    <header class="sevens-header">
+      <a href="lobby.html" class="sevens-back-btn" id="back-to-lobby-btn">← Games</a>
+      <div class="sevens-title-area">
+        <h1 class="sevens-title">七並べ</h1>
+        <span class="sevens-subtitle">Sevens</span>
+      </div>
+      <div class="coin-badge" id="coin-badge">
+        <span class="coin-icon">🪙</span>
+        <span class="coin-amount" id="coin-amount">0</span>
+      </div>
+      <div id="turn-indicator" class="turn-indicator" aria-live="polite"></div>
+      <button id="new-game-btn" class="sevens-new-btn">New Game</button>
+    </header>
+
+    <!-- CPU 3人エリア -->
+    <div class="opponents-row" id="opponents-row">
+
+      <div class="cpu-panel" data-player="1" id="cpu-panel-1">
+        <div class="cpu-panel-top">
+          <span class="cpu-avatar">🤖</span>
+          <div class="cpu-info">
+            <span class="cpu-name">CPU 1</span>
+            <div class="cpu-stats">
+              <span class="cpu-card-count">12 枚</span>
+              <span class="cpu-pass-count">パス 0/3</span>
+            </div>
+          </div>
+          <div class="cpu-status" id="cpu-status-1"></div>
+        </div>
+        <div class="cpu-card-backs" id="cpu-backs-1"></div>
+      </div>
+
+      <div class="cpu-panel" data-player="2" id="cpu-panel-2">
+        <div class="cpu-panel-top">
+          <span class="cpu-avatar">🤖</span>
+          <div class="cpu-info">
+            <span class="cpu-name">CPU 2</span>
+            <div class="cpu-stats">
+              <span class="cpu-card-count">12 枚</span>
+              <span class="cpu-pass-count">パス 0/3</span>
+            </div>
+          </div>
+          <div class="cpu-status" id="cpu-status-2"></div>
+        </div>
+        <div class="cpu-card-backs" id="cpu-backs-2"></div>
+      </div>
+
+      <div class="cpu-panel" data-player="3" id="cpu-panel-3">
+        <div class="cpu-panel-top">
+          <span class="cpu-avatar">🤖</span>
+          <div class="cpu-info">
+            <span class="cpu-name">CPU 3</span>
+            <div class="cpu-stats">
+              <span class="cpu-card-count">12 枚</span>
+              <span class="cpu-pass-count">パス 0/3</span>
+            </div>
+          </div>
+          <div class="cpu-status" id="cpu-status-3"></div>
+        </div>
+        <div class="cpu-card-backs" id="cpu-backs-3"></div>
+      </div>
+
+    </div>
+
+    <!-- ボード（4スート × 13列） -->
+    <section class="board-section">
+      <div id="sevens-board">
+        <div class="suit-row" data-suit="spades">
+          <div class="suit-label spade-color">♠</div>
+          <div class="card-slots" id="slots-spades"></div>
+        </div>
+        <div class="suit-row" data-suit="hearts">
+          <div class="suit-label heart-color">♥</div>
+          <div class="card-slots" id="slots-hearts"></div>
+        </div>
+        <div class="suit-row" data-suit="clubs">
+          <div class="suit-label club-color">♣</div>
+          <div class="card-slots" id="slots-clubs"></div>
+        </div>
+        <div class="suit-row" data-suit="diamonds">
+          <div class="suit-label diamond-color">♦</div>
+          <div class="card-slots" id="slots-diamonds"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- プレイヤーエリア -->
+    <div id="player-area" class="player-area">
+      <div class="player-info-bar">
+        <div class="player-label">
+          <span class="player-icon">👤</span>
+          <span class="player-you-text">あなた</span>
+          <span id="passes-remaining" class="passes-remaining">パス残り 3 回</span>
+        </div>
+        <button id="pass-btn" class="pass-btn" disabled>パス（残り 3 回）</button>
+      </div>
+      <div class="hand-scroll-wrap">
+        <div id="hand-cards" class="hand-cards"></div>
+      </div>
+    </div>
+
+    <!-- 結果オーバーレイ -->
+    <div id="result-overlay" class="result-overlay hidden" aria-modal="true" role="dialog">
+      <div class="result-modal">
+        <div class="result-icon" id="result-icon">🏆</div>
+        <h2 class="result-title" id="result-title">ゲーム終了</h2>
+        <p class="result-sub" id="result-sub"></p>
+        <div class="result-ranking" id="result-ranking"></div>
+        <div id="result-coins" class="result-coins"></div>
+        <button id="play-again-btn" class="play-again-btn">もう一度プレイ</button>
+        <a href="lobby.html" class="result-lobby-link">ロビーへ戻る</a>
+      </div>
+    </div>
+
+    <!-- スーツ絵完成演出オーバーレイ（ソリティアと同じ演出） -->
+    <div id="suit-reveal-overlay" class="suit-reveal-hidden">
+      <div id="suit-reveal-bg"></div>
+      <div id="suit-reveal-frame">
+        <div id="suit-reveal-layers"></div>
+        <div id="suit-reveal-label"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/save.js"></script>
+  <script src="sevens.js"></script>
+</body>
+</html>

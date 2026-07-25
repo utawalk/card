@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポーカー — Card Games</title>
+  <meta name="description" content="テキサスホールデムポーカー。CPU3人とチップを賭けて戦おう！">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="lobby.css">
+  <link rel="stylesheet" href="poker.css">
+</head>
+<body>
+  <div id="poker-container">
+
+    <!-- ヘッダー -->
+    <header class="pk-header">
+      <a href="lobby.html" class="pk-back-btn">← Games</a>
+      <div class="pk-title-area">
+        <h1 class="pk-title">ポーカー</h1>
+        <span class="pk-subtitle">Texas Hold'em</span>
+      </div>
+      <div class="coin-badge" id="coin-badge">
+        <span class="coin-icon">🪙</span>
+        <span class="coin-amount" id="coin-amount">0</span>
+      </div>
+      <div id="phase-badge" class="phase-badge">PRE-FLOP</div>
+      <button id="new-game-btn" class="pk-new-btn">New Game</button>
+    </header>
+
+    <!-- テーブル（全体 flex column） -->
+    <div class="table-wrap">
+
+      <!-- ポーカーテーブル本体 -->
+      <div class="poker-table">
+
+        <!-- CPU 3人 -->
+        <div class="cpu-row">
+
+          <div class="cpu-panel" id="cpu-1" data-player="1">
+            <div class="cpu-top">
+              <span class="cpu-avatar">🤖</span>
+              <div class="cpu-info">
+                <span class="cpu-name" id="cpu-name-1">CPU 1</span>
+                <span class="cpu-chips" id="cpu-chips-1">1000</span>
+              </div>
+              <span class="cpu-action-badge" id="cpu-action-1"></span>
+            </div>
+            <div class="cpu-hole-cards" id="cpu-hole-1">
+              <div class="cpu-card-slot"><img src="images/cards/back.png" alt="card" class="cpu-card-img"></div>
+              <div class="cpu-card-slot"><img src="images/cards/back.png" alt="card" class="cpu-card-img"></div>
+            </div>
+            <div class="cpu-hand-name" id="cpu-hand-1"></div>
+          </div>
+
+          <div class="cpu-panel" id="cpu-2" data-player="2">
+            <div class="cpu-top">
+              <span class="cpu-avatar">🤖</span>
+              <div class="cpu-info">
+                <span class="cpu-name" id="cpu-name-2">CPU 2</span>
+                <span class="cpu-chips" id="cpu-chips-2">1000</span>
+              </div>
+              <span class="cpu-action-badge" id="cpu-action-2"></span>
+            </div>
+            <div class="cpu-hole-cards" id="cpu-hole-2">
+              <div class="cpu-card-slot"><img src="images/cards/back.png" alt="card" class="cpu-card-img"></div>
+              <div class="cpu-card-slot"><img src="images/cards/back.png" alt="card" class="cpu-card-img"></div>
+            </div>
+            <div class="cpu-hand-name" id="cpu-hand-2"></div>
+          </div>
+
+          <div class="cpu-panel" id="cpu-3" data-player="3">
+            <div class="cpu-top">
+              <span class="cpu-avatar">🤖</span>
+              <div class="cpu-info">
+                <span class="cpu-name" id="cpu-name-3">CPU 3</span>
+                <span class="cpu-chips" id="cpu-chips-3">1000</span>
+              </div>
+              <span class="cpu-action-badge" id="cpu-action-3"></span>
+            </div>
+            <div class="cpu-hole-cards" id="cpu-hole-3">
+              <div class="cpu-card-slot"><img src="images/cards/back.png" alt="card" class="cpu-card-img"></div>
+              <div class="cpu-card-slot"><img src="images/cards/back.png" alt="card" class="cpu-card-img"></div>
+            </div>
+            <div class="cpu-hand-name" id="cpu-hand-3"></div>
+          </div>
+
+        </div>
+
+        <!-- コミュニティカード + ポット -->
+        <div class="community-row">
+          <div class="community-cards">
+            <div class="comm-slot" id="comm-0"><div class="comm-empty"></div></div>
+            <div class="comm-slot" id="comm-1"><div class="comm-empty"></div></div>
+            <div class="comm-slot" id="comm-2"><div class="comm-empty"></div></div>
+            <div class="comm-slot" id="comm-3"><div class="comm-empty"></div></div>
+            <div class="comm-slot" id="comm-4"><div class="comm-empty"></div></div>
+          </div>
+          <div class="pot-info">
+            <div class="pot-label-text">POT</div>
+            <div class="pot-amount" id="pot-amount">0</div>
+          </div>
+        </div>
+
+        <!-- メッセージ -->
+        <div id="message-bar" class="pk-message" aria-live="polite"></div>
+
+      </div><!-- /poker-table -->
+
+      <!-- プレイヤーセクション -->
+      <div id="player-section" class="player-section">
+
+        <!-- プレイヤー情報 -->
+        <div class="player-info-row">
+          <div class="player-id">
+            <span class="player-avatar">👤</span>
+            <span class="player-label">あなた</span>
+          </div>
+          <div class="player-chip-wrap">
+            <span class="chip-icon-sm">💰</span>
+            <span class="player-chips-num" id="player-chips">1000</span>
+          </div>
+          <div class="player-bet-wrap">
+            <span class="bet-tag" id="player-bet-tag"></span>
+          </div>
+          <div class="hand-name-wrap" id="hand-name-wrap">
+            <span class="hand-name-text" id="hand-name-text"></span>
+          </div>
+        </div>
+
+        <!-- プレイヤー手札 -->
+        <div class="player-hole-row">
+          <div class="player-card-slot" id="player-card-0"></div>
+          <div class="player-card-slot" id="player-card-1"></div>
+        </div>
+
+        <!-- アクションパネル -->
+        <div id="action-panel" class="action-panel">
+          <button id="fold-btn"  class="act-btn fold-btn"  disabled>FOLD</button>
+          <button id="call-btn"  class="act-btn call-btn"  disabled>CHECK</button>
+          <div class="raise-group">
+            <button id="raise-btn" class="act-btn raise-btn" disabled>RAISE</button>
+            <div class="raise-slider-wrap">
+              <button id="raise-down" class="raise-adj">−</button>
+              <span id="raise-display" class="raise-display">40</span>
+              <button id="raise-up"   class="raise-adj">＋</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /player-section -->
+
+    </div><!-- /table-wrap -->
+
+    <!-- ゲーム結果オーバーレイ -->
+    <div id="result-overlay" class="result-overlay hidden" role="dialog" aria-modal="true">
+      <div class="result-modal">
+        <div class="result-icon" id="result-icon">🏆</div>
+        <h2 class="result-title" id="result-title">勝利！</h2>
+        <p class="result-sub" id="result-sub"></p>
+        <div class="result-chips-row" id="result-chips-row"></div>
+        <div id="result-coins" class="result-coins"></div>
+        <button id="result-retry-btn" class="result-btn-primary">もう一度</button>
+        <a href="lobby.html" class="result-lobby-link">ロビーへ戻る</a>
+      </div>
+    </div>
+
+  </div><!-- /poker-container -->
+  <script src="js/save.js"></script>
+  <script src="poker.js"></script>
+</body>
+</html>

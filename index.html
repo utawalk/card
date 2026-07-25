@@ -16,6 +16,7 @@
         <button id="auto-foundation-btn" class="btn auto-btn">🤖 AUTO</button>
         <button id="hint-btn" class="btn hint-btn">💡 ヒント</button>
         <div class="stats">
+          <span id="coin-display" class="stat-coin">🪙 <span id="coin-amount">0</span></span>
           <span id="score-display">Score: 0</span>
           <span id="moves-display">Moves: 0</span>
         </div>
@@ -82,7 +83,11 @@
           <span id="final-score">Score: 0</span>
           <span id="final-moves">Moves: 0</span>
         </div>
-        <button id="play-again-btn" class="btn primary-btn">Play Again</button>
+        <div id="victory-coins-earned" class="victory-coins-earned"></div>
+        <div class="victory-actions">
+          <button id="play-again-btn" class="btn primary-btn">Play Again</button>
+          <a href="lobby.html" class="btn back-btn small" id="victory-lobby-btn">← ロビーに戻る</a>
+        </div>
       </div>
     </div>
 
@@ -114,6 +119,7 @@
     </div>
   </div>
 
+  <script src="js/save.js"></script>
   <script src="js/logic.js"></script>
   <script src="js/render.js"></script>
   <script src="js/effects.js"></script>

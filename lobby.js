@@ -5,7 +5,17 @@
 document.addEventListener('DOMContentLoaded', () => {
   spawnAmbientSuits();
   initGameCardEffects();
+  loadSaveStats();  // セーブデータをロビーに表示
+  updateCoinDisplay();
 });
+
+/** ヘッダーのコイン所持数表示を更新する */
+function updateCoinDisplay() {
+  const el = document.getElementById('coin-amount');
+  if (el && typeof Wallet_getCoins === 'function') {
+    el.textContent = Wallet_getCoins().toLocaleString();
+  }
+}
 
 // ============================================================
 //  浮遊するスーツのアンビエントアニメーション
@@ -171,4 +181,46 @@ function shakeComing(card) {
   ];
   const anim = card.animate(keyframes, { duration: 350, easing: 'ease-in-out' });
   anim.onfinish = () => delete card.dataset.shaking;
+}
+
+// ============================================================
+//  セーブデータをロビーに表示
+// ============================================================
+
+function loadSaveStats() {
+  // save.js が読み込まれていない場合はスキップ
+  if (typeof Solitaire_getRecord !== 'function') return;
+
+  const rec = Solitaire_getRecord();
+
+  const elHighScore = document.getElementById('stat-high-score');
+  const elBestMoves = document.getElementById('stat-best-moves');
+  const elWins      = document.getElementById('stat-wins');
+  const statsBlock  = document.getElementById('solitaire-save-stats');
+
+  if (!elHighScore || !elBestMoves || !elWins) return;
+
+  if (rec.gamesPlayed === 0) {
+    // 初回プレイ前 → ブロック全体を非表示にせず「未プレイ」テキストだけ
+    elHighScore.textContent = '—';
+    elBestMoves.textContent = '—';
+    elWins.textContent      = '—';
+    if (statsBlock) statsBlock.classList.add('no-data');
+    return;
+  }
+
+  if (statsBlock) statsBlock.classList.remove('no-data');
+
+  // ハイスコア
+  elHighScore.textContent = rec.highScore > 0
+    ? rec.highScore.toLocaleString()
+    : '—';
+
+  // 最少手数（クリア済みの場合のみ）
+  elBestMoves.textContent = rec.bestMoves !== null
+    ? `${rec.bestMoves} 手`
+    : '—';
+
+  // クリア回数 / プレイ回数
+  elWins.textContent = `${rec.gamesWon} / ${rec.gamesPlayed}`;
 }

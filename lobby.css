@@ -97,9 +97,16 @@ html, body {
    ====================================================== */
 
 .lobby-header {
+  position: relative;
   text-align: center;
   margin-bottom: 52px;
   animation: header-drop 0.9s var(--ease-spring) both;
+}
+
+.lobby-header .coin-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
 }
 
 @keyframes header-drop {
@@ -391,6 +398,59 @@ html, body {
   color: var(--text-sub);
 }
 
+/* ---- セーブデータ表示 ---- */
+.game-save-stats {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  animation: fade-in 0.5s 0.5s ease both;
+}
+
+.game-save-stats.no-data {
+  opacity: 0.5;
+}
+
+.save-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  transition: background 0.2s ease;
+}
+
+.game-card.available:hover .save-stat {
+  background: rgba(212,175,55,0.06);
+}
+
+.save-stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.save-stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+/* ハイスコアの値を少し大きく目立たせる */
+#stat-high-score {
+  font-size: 16px;
+  text-shadow: 0 0 10px rgba(212,175,55,0.4);
+}
+
 /* ---- Action area ---- */
 .game-card-action {
   display: flex;
@@ -443,6 +503,123 @@ html, body {
 }
 
 /* ======================================================
+   コイン所持数バッジ（全ゲーム共通ヘッダー表示）
+   ====================================================== */
+
+.coin-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(212,175,55,0.10);
+  border: 1px solid var(--border-gold);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--gold-light);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.coin-badge .coin-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ======================================================
+   Collection / Utility Nav（カードギャラリーへの導線）
+   ====================================================== */
+
+.collection-nav {
+  width: 100%;
+  max-width: 1080px;
+  margin-top: 32px;
+}
+
+.collection-link {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 26px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.12), var(--surface) 60%);
+  border: 1px solid var(--border-gold);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.3s var(--ease-spring),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+  animation: card-rise 0.65s var(--ease-spring) 0.5s both;
+}
+
+.collection-link:hover {
+  transform: translateY(-6px) scale(1.015);
+  border-color: rgba(212,175,55,0.7);
+  box-shadow:
+    0 26px 64px rgba(0,0,0,0.65),
+    0 0 36px rgba(212,175,55,0.25);
+}
+
+.collection-link:active {
+  transform: translateY(-2px) scale(0.995);
+  transition-duration: 0.1s;
+}
+
+.collection-link-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 26px;
+  background: radial-gradient(circle, rgba(212,175,55,0.24) 0%, rgba(212,175,55,0.06) 70%);
+  border: 1px solid var(--border-gold);
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.collection-link:hover .collection-link-icon {
+  transform: scale(1.08) rotate(-6deg);
+}
+
+.collection-link-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.collection-link-title {
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--gold-light);
+}
+
+.collection-link-sub {
+  font-size: 12.5px;
+  color: var(--text-sub);
+}
+
+.collection-link-arrow {
+  flex: 0 0 auto;
+  font-size: 20px;
+  color: var(--gold);
+  opacity: 0.8;
+  transition: transform 0.3s var(--ease-spring), opacity 0.2s ease;
+}
+
+.collection-link:hover .collection-link-arrow {
+  transform: translateX(6px);
+  opacity: 1;
+}
+
+/* ======================================================
    Footer
    ====================================================== */
 
@@ -480,6 +657,25 @@ html, body {
 
   .game-card-inner {
     padding: 22px 20px 20px;
+  }
+
+  .collection-link {
+    padding: 16px 18px;
+    gap: 14px;
+  }
+
+  .collection-link-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .collection-link-title {
+    font-size: 15px;
+  }
+
+  .collection-link-sub {
+    font-size: 11.5px;
   }
 }
 
