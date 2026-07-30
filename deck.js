@@ -17,6 +17,7 @@ const DECK_CARD_SUBDIR = 'A001_card';
 const DECK_PIC_SUBDIR = 'A001_pitc';
 
 // ランクの定義（ファイル名 / 表示名 のペア）
+// パワー（カードの強さ）は js/cards.js の CARD_POWERS で一元管理している
 const DECK_RANKS = [
   { file: 'A',  label: 'Ace'   },
   { file: '2',  label: '2'     },
@@ -117,10 +118,12 @@ function buildGallery() {
 
     // 13枚のトランプ表面画像
     DECK_RANKS.forEach((rank, rankIdx) => {
+      const power = (typeof getCardPower === 'function') ? getCardPower(suit.key, rank.file) : null;
       const item = createCardItem({
         suit,
         imgSrc:     `images/cards/${suit.key}/${DECK_CARD_SUBDIR}/${rank.file}.png`,
         label:      rank.label,
+        power,
         rankIdx,
         isComplete: false,
       });
@@ -134,6 +137,7 @@ function buildGallery() {
       suit,
       imgSrc:     `images/cards/${suit.key}/${DECK_PIC_SUBDIR}/all.png`,
       label:      '✦ Complete',
+      power:      null,
       rankIdx:    DECK_RANKS.length,
       isComplete: true,
     });
@@ -147,7 +151,7 @@ function buildGallery() {
 }
 
 // カードアイテムDOM を生成する
-function createCardItem({ suit, imgSrc, label, rankIdx, isComplete }) {
+function createCardItem({ suit, imgSrc, label, power, rankIdx, isComplete }) {
   const item = document.createElement('div');
   item.className = 'deck-card-item' + (isComplete ? ' is-complete' : '');
   item.dataset.src   = imgSrc;
@@ -195,6 +199,16 @@ function createCardItem({ suit, imgSrc, label, rankIdx, isComplete }) {
 
   item.appendChild(imgWrap);
   item.appendChild(lbl);
+
+  // パワー表示（完成絵タイルには表示しない）
+  if (power !== null && power !== undefined) {
+    const pw = document.createElement('div');
+    pw.className = 'deck-card-power';
+    pw.innerHTML = `<span class="deck-card-power-icon">⚡</span><span class="deck-card-power-num">${power}</span>`;
+    pw.style.setProperty('--suit-color', suit.color);
+    item.dataset.power = String(power);
+    item.appendChild(pw);
+  }
 
   // クリック / キーボードでモーダルを開く
   item.addEventListener('click', () => {

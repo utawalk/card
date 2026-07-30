@@ -341,6 +341,35 @@
   background: rgba(0,0,0,0.6);
 }
 
+/* パワー表示 */
+.deck-card-power {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 10px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-align: center;
+  color: var(--suit-color, #d4af37);
+  background: rgba(0,0,0,0.55);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.deck-card-power-icon {
+  font-size: 11px;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.deck-card-power-num {
+  font-family: 'Cinzel', serif;
+}
+
+.deck-card-item:hover .deck-card-power {
+  background: rgba(0,0,0,0.7);
+}
+
 /* 完成絵（card_all）を特別扱い */
 .deck-card-item.is-complete {
   border-color: rgba(212,175,55,0.25);

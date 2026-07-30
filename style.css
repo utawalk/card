@@ -683,6 +683,18 @@ h1 {
   overflow: hidden;
 }
 
+/* パワー加点ポップアップ専用レイヤー: 絵合わせ演出（z-index:6000）よりも手前に表示する */
+#score-popup-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 6500;
+  overflow: hidden;
+}
+
 /* --- パーティクル共通 --- */
 .particle {
   position: absolute;
@@ -773,6 +785,27 @@ h1 {
   20%  { opacity: 1;   transform: translate(-50%, -80%) scale(1.2); }
   50%  { opacity: 1;   transform: translate(-50%, -120%) scale(1); }
   100% { opacity: 0;   transform: translate(-50%, -180%) scale(0.8); }
+}
+
+/* --- パワー加点ポップアップ（フローティングテキストの派生） --- */
+/* 通常のランクメッセージよりゆっくり・長めに表示してしっかり見えるようにする */
+.floating-text-score {
+  font-size: 26px;
+  font-weight: 900;
+  color: #ffd76a;
+  text-shadow:
+    0 0 16px rgba(255, 215, 106, 0.9),
+    0 0 32px rgba(255, 215, 106, 0.5),
+    0 2px 4px rgba(0,0,0,0.8);
+  font-family: 'Cinzel', 'Georgia', serif;
+  animation: float-up-slow 2.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes float-up-slow {
+  0%   { opacity: 0; transform: translate(-50%, -50%)  scale(0.4);  }
+  15%  { opacity: 1; transform: translate(-50%, -85%)  scale(1.3);  }
+  70%  { opacity: 1; transform: translate(-50%, -150%) scale(1);    }
+  100% { opacity: 0; transform: translate(-50%, -210%) scale(0.85); }
 }
 
 /* --- カードフラッシュ（置いた直後の光エフェクト） --- */
