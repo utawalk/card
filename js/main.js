@@ -366,7 +366,9 @@ function moveCardsToTableau(targetColIdx) {
 function moveCardToFoundation(targetSuit) {
   const cards = removeCardsFromOrigin();
   GameState.foundations[targetSuit].push(cards[0]);
-  GameState.score += 10; // Reward
+  // カードのパワーを得点として加算（今後カードごとにパワーを変える予定）
+  const power1 = (typeof getCardPower === 'function') ? getCardPower(targetSuit, cards[0].rank) : 10;
+  GameState.score += power1;
 }
 
 function removeCardsFromOrigin() {
@@ -517,7 +519,9 @@ function handleCardClick(targetEl) {
     
     playSound('drop');
     GameState.moves++;
-    GameState.score += 10;
+    // カードのパワーを得点として加算（今後カードごとにパワーを変える予定）
+    const power2 = (typeof getCardPower === 'function') ? getCardPower(card.suit, card.rank) : 10;
+    GameState.score += power2;
     // エフェクト発火
     const foundIdx2 = SUITS.indexOf(card.suit);
     triggerFoundationEffect(card.suit, card.rank, foundIdx2);
@@ -559,7 +563,9 @@ function autoMoveToFoundation(cardId) {
 
   playSound('drop');
   GameState.moves++;
-  GameState.score += 10;
+  // カードのパワーを得点として加算（今後カードごとにパワーを変える予定）
+  const power3 = (typeof getCardPower === 'function') ? getCardPower(card.suit, card.rank) : 10;
+  GameState.score += power3;
 
   const foundIdx = SUITS.indexOf(card.suit);
   triggerFoundationEffect(card.suit, card.rank, foundIdx);
@@ -647,7 +653,9 @@ function runAutoFoundation() {
   }
   GameState.foundations[card.suit].push(card);
   GameState.moves++;
-  GameState.score += 10;
+  // カードのパワーを得点として加算（今後カードごとにパワーを変える予定）
+  const power4 = (typeof getCardPower === 'function') ? getCardPower(card.suit, card.rank) : 10;
+  GameState.score += power4;
 
   playSound('drop');
   triggerFoundationEffect(card.suit, card.rank, SUITS.indexOf(card.suit));

@@ -217,8 +217,15 @@ function updateCoinDisplay() {
 
 function showVictory() {
   const overlay = document.getElementById('victory-overlay');
+
+  // 既に表示中なら再実行しない（コイン二重付与・効果音の多重再生を防止）
+  if (overlay && !overlay.classList.contains('hidden')) return;
+
   document.getElementById('final-score').textContent = `Score: ${GameState.score}`;
   document.getElementById('final-moves').textContent = `Moves: ${GameState.moves}`;
+
+  // ゲームクリア専用の長めのファンファーレ
+  if (typeof playGameClearFanfare === 'function') playGameClearFanfare();
 
   // ---- セーブ処理 ----
   let newHighScore  = false;

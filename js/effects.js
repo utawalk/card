@@ -107,6 +107,35 @@ function playKingFanfare(ctx, now) {
   playTone(ctx, 130.81, now + 0.48, 0.35, 0.35, 'sine', 0);
 }
 
+// --- ゲームクリア（全カードがファウンデーションに揃った）専用の長めのファンファーレ ---
+function playGameClearFanfare() {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+
+    // 上昇アルペジオ → 最後に大きな和音を長めに響かせる（全体で約2.5秒）
+    const notes = [
+      { f: 523.25,  t: 0.00, dur: 0.22, g: 0.24 }, // C5
+      { f: 659.25,  t: 0.15, dur: 0.22, g: 0.24 }, // E5
+      { f: 783.99,  t: 0.30, dur: 0.22, g: 0.24 }, // G5
+      { f: 1046.50, t: 0.45, dur: 0.35, g: 0.26 }, // C6
+      { f: 1318.51, t: 0.62, dur: 0.45, g: 0.24 }, // E6
+    ];
+    notes.forEach(n => playRichTone(ctx, n.f, now + n.t, n.dur, n.g));
+
+    // 低音のベースパルスで盛り上げる
+    playTone(ctx, 130.81, now,        0.3, 0.30, 'sine', 0);
+    playTone(ctx, 196.00, now + 0.45, 0.3, 0.28, 'sine', 0);
+
+    // 締めの大きな和音（C-E-G-C）を長くサステインさせる
+    const chordTime = now + 0.85;
+    [523.25, 659.25, 783.99, 1046.50].forEach(f => playRichTone(ctx, f, chordTime, 1.6, 0.18));
+
+    // キラキラした高音の飾りを重ねる
+    playSparkleTone(ctx, chordTime + 0.1, [1567.98, 2093.00, 1567.98], 0.12, 0.14);
+  } catch (e) { /* AudioContext が使えない環境ではスキップ */ }
+}
+
 // --- 2〜10: カード値でピッチを変えるシングルチャイム ---
 function playChime(ctx, now, rank) {
   // value 2=2 〜 10=10 → 周波数を C5(523Hz) 〜 B5(987Hz) にマッピング
@@ -172,6 +201,21 @@ function triggerFoundationEffect(suit, rank, pileIndex) {
 
   // 3. フローティングテキストポップアップ
   spawnFloatingText(centerX, centerY, rank, theme);
+
+  // 3.5 パワー加点ポップアップ（カードのパワーがそのまま得点として加算される）
+  // カードの近く（フォンデーション）だと見えづらいため、完成途中の絵（絵合わせ演出）の近くに表示する
+  const power = (typeof getCardPower === 'function') ? getCardPower(suit, rank) : null;
+  if (power !== null) {
+    const revealFrame = document.getElementById('suit-reveal-frame');
+    let scoreX = centerX;
+    let scoreY = centerY;
+    if (revealFrame) {
+      const revealRect = revealFrame.getBoundingClientRect();
+      scoreX = revealRect.left + revealRect.width / 2;
+      scoreY = revealRect.top - 16; // 絵のフレーム上端の少し上に表示
+    }
+    spawnScorePopup(scoreX, scoreY, power, theme);
+  }
 
   // 4. 画面端のグロー（Kのときは特別演出）
   if (rank === 'K') {
@@ -254,6 +298,26 @@ function spawnFloatingText(cx, cy, rank, theme) {
 
   container.appendChild(text);
   setTimeout(() => text.remove(), 1200);
+}
+
+// --- 3.5 パワー加点ポップアップ ---
+function spawnScorePopup(cx, cy, power, theme) {
+  // 絵合わせ演出（z-index:6000）よりも手前に表示するための専用レイヤー
+  const container = document.getElementById('score-popup-layer') || document.getElementById('particle-layer');
+  if (!container) return;
+
+  const text = document.createElement('div');
+  text.className = 'floating-text floating-text-score';
+  text.textContent = `+${power}`;
+  text.style.left = `${cx}px`;
+  text.style.top = `${cy}px`;
+  text.style.setProperty('--ft-color', theme.primary);
+
+  // 絵合わせ演出（完成途中の絵）が表示されるタイミングに合わせて少し遅れて出す
+  setTimeout(() => {
+    container.appendChild(text);
+    setTimeout(() => text.remove(), 2500); // ゆっくり長めに表示（float-up-slow: 2.4s に合わせる）
+  }, 250);
 }
 
 // --- 4. キング完成特別演出 ---
