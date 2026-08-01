@@ -28,6 +28,50 @@
       </div>
     </header>
 
+    <!-- 現在のデッキの完成絵プレビュー（各スート） -->
+    <section class="lobby-deck-preview" id="lobby-deck-preview">
+      <p class="lobby-deck-preview-hint">今のデッキ</p>
+      <div class="lobby-deck-preview-grid">
+        <a href="deck.html#suit-spades" class="lobby-deck-preview-tile" data-suit="spades">
+          <div class="lobby-deck-preview-imgwrap" data-suit-img="spades"></div>
+          <span class="lobby-deck-preview-label">♠ Spades</span>
+        </a>
+        <a href="deck.html#suit-hearts" class="lobby-deck-preview-tile" data-suit="hearts">
+          <div class="lobby-deck-preview-imgwrap" data-suit-img="hearts"></div>
+          <span class="lobby-deck-preview-label">♥ Hearts</span>
+        </a>
+        <a href="deck.html#suit-clubs" class="lobby-deck-preview-tile" data-suit="clubs">
+          <div class="lobby-deck-preview-imgwrap" data-suit-img="clubs"></div>
+          <span class="lobby-deck-preview-label">♣ Clubs</span>
+        </a>
+        <a href="deck.html#suit-diamonds" class="lobby-deck-preview-tile" data-suit="diamonds">
+          <div class="lobby-deck-preview-imgwrap" data-suit-img="diamonds"></div>
+          <span class="lobby-deck-preview-label">♦ Diamonds</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- コレクション / ユーティリティ リンク -->
+    <nav class="collection-nav">
+      <a href="deck.html" class="collection-link" id="link-deck">
+        <span class="collection-link-icon">🎴</span>
+        <span class="collection-link-text">
+          <span class="collection-link-title">カード一覧</span>
+          <span class="collection-link-sub">4スート × 13 枚 + 完成絵 — カードギャラリーを見る</span>
+        </span>
+        <span class="collection-link-arrow">→</span>
+      </a>
+
+      <a href="gacha.html" class="collection-link collection-link-gacha" id="link-gacha">
+        <span class="collection-link-icon">🎁</span>
+        <span class="collection-link-text">
+          <span class="collection-link-title">カードガチャ</span>
+          <span class="collection-link-sub">コインを使ってカラーカードを手に入れよう（パワー2倍！）</span>
+        </span>
+        <span class="collection-link-arrow">→</span>
+      </a>
+    </nav>
+
     <!-- ゲーム選択グリッド -->
     <main class="game-grid-section">
       <p class="section-hint">ゲームを選んでください</p>
@@ -167,24 +211,15 @@
       </div>
     </main>
 
-    <!-- コレクション / ユーティリティ リンク -->
-    <nav class="collection-nav">
-      <a href="deck.html" class="collection-link" id="link-deck">
-        <span class="collection-link-icon">🎴</span>
-        <span class="collection-link-text">
-          <span class="collection-link-title">カード一覧</span>
-          <span class="collection-link-sub">4スート × 13 枚 + 完成絵 — カードギャラリーを見る</span>
-        </span>
-        <span class="collection-link-arrow">→</span>
-      </a>
-    </nav>
 
     <!-- フッター -->
     <footer class="lobby-footer">
       <p>♠ ♥ ♣ ♦ &nbsp; Card Games Collection &nbsp; ♠ ♥ ♣ ♦</p>
+      <a href="debug.html" class="debug-footer-link">🛠 デバッグページ</a>
     </footer>
   </div>
 
+  <script src="js/cards.js"></script>
   <script src="js/save.js"></script>
   <script src="lobby.js"></script>
 </body>

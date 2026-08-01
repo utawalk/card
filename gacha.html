@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カードガチャ — Card Games</title>
+  <meta name="description" content="コインを消費してガチャを引き、カラーカードを手に入れよう。カラーカードはグレーの2倍のパワーを持ち、自動でデッキにセットされます。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="lobby.css">
+  <link rel="stylesheet" href="gacha.css">
+</head>
+<body>
+  <!-- 浮遊するスーツの背景 -->
+  <div id="ambient-layer" aria-hidden="true"></div>
+
+  <div id="lobby-container" class="gacha-page">
+
+    <!-- ヘッダー -->
+    <header class="gacha-header">
+      <a href="lobby.html" class="gacha-back-btn" id="back-to-lobby-btn">
+        <span class="gacha-back-arrow">←</span>
+        <span>ロビーへ戻る</span>
+      </a>
+      <div class="gacha-title-wrap">
+        <h1 class="gacha-page-title">🎁 カードガチャ</h1>
+        <p class="gacha-page-sub">Card Gacha</p>
+      </div>
+      <div class="coin-badge" id="coin-badge">
+        <span class="coin-icon">🪙</span>
+        <span class="coin-amount" id="coin-amount">0</span>
+      </div>
+    </header>
+
+    <main class="gacha-main">
+
+      <!-- ガチャ本体 -->
+      <section class="gacha-stage">
+        <p class="gacha-desc">
+          コインを使ってガチャを引くと、52枚の中からランダムでカードのカラー版が手に入ります。<br>
+          カラーカードはグレーの<strong>2倍のパワー</strong>を持ち、手に入れると自動でデッキにセットされます。
+        </p>
+
+        <div class="gacha-machine">
+          <div class="gacha-box-ring" id="gacha-box-ring"></div>
+          <div class="gacha-box" id="gacha-box">
+            <span class="gacha-box-icon" id="gacha-box-icon">🎁</span>
+          </div>
+        </div>
+
+        <button class="gacha-pull-btn" id="gacha-pull-btn">
+          <span class="gacha-pull-label">ガチャを引く</span>
+          <span class="gacha-pull-cost">🪙 <span id="gacha-cost-label">50</span></span>
+        </button>
+        <p class="gacha-insufficient hidden" id="gacha-insufficient">コインが足りません…</p>
+      </section>
+
+      <!-- コレクション一覧 -->
+      <section class="gacha-collection">
+        <div class="gacha-collection-header">
+          <h2 class="gacha-collection-title">コレクション</h2>
+          <span class="gacha-collection-progress" id="gacha-progress">0 / 52</span>
+        </div>
+        <div class="gacha-collection-grid" id="gacha-collection-grid">
+          <!-- JS で動的生成 -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="lobby-footer">
+      <p>♠ ♥ ♣ ♦ &nbsp; Card Games Collection &nbsp; ♠ ♥ ♣ ♦</p>
+    </footer>
+  </div>
+
+  <!-- 画面フラッシュ・パーティクル用レイヤー -->
+  <div class="gacha-flash" id="gacha-flash"></div>
+  <div class="gacha-particle-layer" id="gacha-particle-layer"></div>
+
+  <!-- 結果オーバーレイ -->
+  <div class="gacha-result-overlay hidden" id="gacha-result-overlay" role="dialog" aria-modal="true" aria-label="ガチャ結果">
+    <div class="gacha-result-box" id="gacha-result-box">
+      <div class="gacha-result-rays" id="gacha-result-rays"></div>
+      <div class="gacha-confetti-layer" id="gacha-confetti-layer"></div>
+      <div class="gacha-result-badge" id="gacha-result-badge">NEW!</div>
+      <div class="gacha-result-img-wrap">
+        <img class="gacha-result-img" id="gacha-result-img" src="" alt="">
+      </div>
+      <div class="gacha-result-name" id="gacha-result-name"></div>
+      <div class="gacha-result-power" id="gacha-result-power"></div>
+      <p class="gacha-result-message" id="gacha-result-message"></p>
+      <button class="gacha-result-close-btn" id="gacha-result-close-btn">閉じる</button>
+    </div>
+  </div>
+
+  <script src="js/cards.js"></script>
+  <script src="js/save.js"></script>
+  <script src="gacha.js"></script>
+</body>
+</html>

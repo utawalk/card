@@ -1,5 +1,7 @@
 // ============================================================
-//  deck.js — Card Gallery（トランプ表面画像 一覧）
+//  deck.js — 今のデッキ（現在セットされているカード一覧）
+//  各カードは所持状態に応じてグレー（A000_card・デフォルト）か
+//  カラー（A001_card・ガチャ入手済み）で表示される。
 // ============================================================
 
 // スートの定義（表示名・記号・フォルダ名・アクセントカラー）
@@ -10,8 +12,8 @@ const DECK_SUITS = [
   { key: 'diamonds', symbol: '♦', name: 'Diamonds', color: '#fbbf24', cssVar: '--diamond' },
 ];
 
-// トランプ表面画像のサブフォルダ名（images/cards/{スート}/A001_card/ 配下）
-const DECK_CARD_SUBDIR = 'A001_card';
+// カード表面画像のパスは js/cards.js の getCardImagePath() が
+// 所持状態（グレー/カラー）に応じて自動で切り替える
 
 // 絵合わせ素材（完成絵）のサブフォルダ名（images/cards/{スート}/A001_pitc/ 配下）
 const DECK_PIC_SUBDIR = 'A001_pitc';
@@ -49,9 +51,75 @@ let modalOpen = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   spawnAmbientSuits();
+  updateCoinDisplay();
   buildGallery();
+  updateOwnedProgress();
+  renderPowerSummary();
   initModal();
 });
+
+/** ヘッダーのコイン所持数表示を更新する */
+function updateCoinDisplay() {
+  const el = document.getElementById('coin-amount');
+  if (el && typeof Wallet_getCoins === 'function') {
+    el.textContent = Wallet_getCoins().toLocaleString();
+  }
+}
+
+/** ヘッダーの「カラー化済み枚数」表示を更新する */
+function updateOwnedProgress() {
+  const el = document.getElementById('deck-owned-progress');
+  if (!el) return;
+  let owned = 0;
+  DECK_SUITS.forEach(suit => {
+    DECK_RANKS.forEach(rank => {
+      if (typeof Collection_isOwned === 'function' && Collection_isOwned(suit.key, rank.file)) owned++;
+    });
+  });
+  el.textContent = `🎨 ${owned} / 52 枚がカラー化済み`;
+}
+
+/** 各スートの合計パワーと、全カードの合計パワーを表示する */
+function renderPowerSummary() {
+  const container = document.getElementById('deck-power-summary');
+  if (!container) return;
+
+  let grandTotal = 0;
+  const suitTotals = DECK_SUITS.map(suit => {
+    let total = 0;
+    DECK_RANKS.forEach(rank => {
+      const power = (typeof getEffectiveCardPower === 'function')
+        ? getEffectiveCardPower(suit.key, rank.file)
+        : 0;
+      total += power;
+    });
+    grandTotal += total;
+    return { suit, total };
+  });
+
+  container.innerHTML = '';
+
+  suitTotals.forEach(({ suit, total }) => {
+    const tile = document.createElement('div');
+    tile.className = 'deck-power-tile';
+    tile.style.setProperty('--suit-color', suit.color);
+    tile.innerHTML = `
+      <span class="deck-power-tile-symbol">${suit.symbol}</span>
+      <span class="deck-power-tile-label">${suit.name}</span>
+      <span class="deck-power-tile-value"><span class="deck-power-tile-icon">⚡</span>${total.toLocaleString()}</span>
+    `;
+    container.appendChild(tile);
+  });
+
+  const totalTile = document.createElement('div');
+  totalTile.className = 'deck-power-tile deck-power-tile-total';
+  totalTile.innerHTML = `
+    <span class="deck-power-tile-symbol">Σ</span>
+    <span class="deck-power-tile-label">合計（52枚）</span>
+    <span class="deck-power-tile-value"><span class="deck-power-tile-icon">⚡</span>${grandTotal.toLocaleString()}</span>
+  `;
+  container.appendChild(totalTile);
+}
 
 // 浮遊スーツのアンビエントアニメーション（lobby.js に倣う）
 function spawnAmbientSuits() {
@@ -103,12 +171,16 @@ function buildGallery() {
     section.id = `suit-${suit.key}`;
 
     // ---- セクション見出し ----
+    const suitOwnedCount = DECK_RANKS.filter(r =>
+      typeof Collection_isOwned === 'function' && Collection_isOwned(suit.key, r.file)
+    ).length;
+
     const heading = document.createElement('div');
     heading.className = 'deck-suit-heading';
     heading.innerHTML = `
       <span class="deck-suit-symbol" style="color:${suit.color}">${suit.symbol}</span>
       <span class="deck-suit-name"  style="color:${suit.color}">${suit.name}</span>
-      <span class="deck-suit-badge">13 Cards + Complete</span>
+      <span class="deck-suit-badge">🎨 ${suitOwnedCount} / 13 カラー</span>
     `;
     section.appendChild(heading);
 
@@ -116,14 +188,19 @@ function buildGallery() {
     const grid = document.createElement('div');
     grid.className = 'deck-card-grid';
 
-    // 13枚のトランプ表面画像
+    // 13枚のトランプ表面画像（現在デッキにセットされている見た目＝所持状態で自動切り替え）
     DECK_RANKS.forEach((rank, rankIdx) => {
-      const power = (typeof getCardPower === 'function') ? getCardPower(suit.key, rank.file) : null;
+      const power = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(suit.key, rank.file) : null;
+      const owned = (typeof Collection_isOwned === 'function') ? Collection_isOwned(suit.key, rank.file) : false;
+      const imgSrc = (typeof getCardImagePath === 'function')
+        ? getCardImagePath(suit.key, rank.file)
+        : `images/cards/${suit.key}/A000_card/${rank.file}.png`;
       const item = createCardItem({
         suit,
-        imgSrc:     `images/cards/${suit.key}/${DECK_CARD_SUBDIR}/${rank.file}.png`,
+        imgSrc,
         label:      rank.label,
         power,
+        owned,
         rankIdx,
         isComplete: false,
       });
@@ -132,12 +209,15 @@ function buildGallery() {
       allCardItems.push(item);
     });
 
-    // Kの右隣に、絵合わせ素材をすべて重ねたときの完成絵 (A001_pitc/all.png) を表示
+    // Kの右隣に、「今デッキにセットされている13枚を実際に重ねた」完成絵を表示
+    // （Canvas合成は使わず、各カードの絵を<img>として重ねるDOM方式にすることで
+    //   file:// で開いた場合でも確実に表示できるようにしている）
     const allItem = createCardItem({
       suit,
-      imgSrc:     `images/cards/${suit.key}/${DECK_PIC_SUBDIR}/all.png`,
+      imgSrc:     null, // 完成絵タイルは単一画像ではなく合成レイヤーで表示する
       label:      '✦ Complete',
       power:      null,
+      owned:      true, // 完成絵タイルはロック表示の対象外
       rankIdx:    DECK_RANKS.length,
       isComplete: true,
     });
@@ -145,23 +225,33 @@ function buildGallery() {
     grid.appendChild(allItem);
     allCardItems.push(allItem);
 
+    if (typeof renderSuitCompositeLayers === 'function') {
+      const imgWrap = allItem.querySelector('.deck-card-img-wrap');
+      renderSuitCompositeLayers(imgWrap, suit.key);
+    }
+
     section.appendChild(grid);
     main.appendChild(section);
   });
 }
 
 // カードアイテムDOM を生成する
-function createCardItem({ suit, imgSrc, label, power, rankIdx, isComplete }) {
+function createCardItem({ suit, imgSrc, label, power, owned, rankIdx, isComplete }) {
   const item = document.createElement('div');
-  item.className = 'deck-card-item' + (isComplete ? ' is-complete' : '');
-  item.dataset.src   = imgSrc;
-  item.dataset.suit  = suit.symbol;
-  item.dataset.name  = suit.name;
-  item.dataset.label = label;
-  item.dataset.color = suit.color;
+  item.className = 'deck-card-item'
+    + (isComplete ? ' is-complete' : '')
+    + (!isComplete ? (owned ? ' is-owned' : ' is-locked') : '');
+  item.dataset.src      = imgSrc || '';
+  item.dataset.suit     = suit.symbol;
+  item.dataset.suitKey  = suit.key;
+  item.dataset.name     = suit.name;
+  item.dataset.label    = label;
+  item.dataset.color    = suit.color;
+  item.dataset.complete = isComplete ? '1' : '';
   item.tabIndex      = 0;
   item.setAttribute('role', 'button');
-  item.setAttribute('aria-label', `${suit.name} ${label}を拡大表示`);
+  item.setAttribute('aria-label',
+    `${suit.name} ${label}を拡大表示${!isComplete ? (owned ? '（カラー所持済み）' : '（グレー・未入手）') : ''}`);
 
   // 完成絵の場合はアクセントボーダーをカスタム色で
   if (isComplete) {
@@ -172,24 +262,37 @@ function createCardItem({ suit, imgSrc, label, power, rankIdx, isComplete }) {
   const imgWrap = document.createElement('div');
   imgWrap.className = 'deck-card-img-wrap';
 
-  const img = document.createElement('img');
-  img.className = 'deck-card-img';
-  img.src = imgSrc;
-  img.alt = `${suit.name} ${label}`;
-  img.loading = 'lazy';
+  if (isComplete) {
+    // 完成絵タイルは単一画像を使わず、呼び出し側で renderSuitCompositeLayers() により
+    // 実際の所持カードの絵を重ねて描画する
+  } else {
+    const img = document.createElement('img');
+    img.className = 'deck-card-img';
+    img.src = imgSrc;
+    img.alt = `${suit.name} ${label}`;
+    img.loading = 'lazy';
 
-  // 画像読み込みエラー時のフォールバック
-  img.onerror = () => {
-    imgWrap.classList.add('img-error');
-    img.style.display = 'none';
-    const fallback = document.createElement('div');
-    fallback.className = 'deck-card-fallback';
-    fallback.innerHTML = `<span>${suit.symbol}</span><small>${label}</small>`;
-    fallback.style.color = suit.color;
-    imgWrap.appendChild(fallback);
-  };
+    // 画像読み込みエラー時のフォールバック
+    img.onerror = () => {
+      imgWrap.classList.add('img-error');
+      img.style.display = 'none';
+      const fallback = document.createElement('div');
+      fallback.className = 'deck-card-fallback';
+      fallback.innerHTML = `<span>${suit.symbol}</span><small>${label}</small>`;
+      fallback.style.color = suit.color;
+      imgWrap.appendChild(fallback);
+    };
 
-  imgWrap.appendChild(img);
+    imgWrap.appendChild(img);
+  }
+
+  // 未所持（グレー）カードにはロックバッジを重ねる
+  if (!isComplete && !owned) {
+    const lock = document.createElement('div');
+    lock.className = 'deck-card-lock';
+    lock.innerHTML = '<span>🔒</span>';
+    imgWrap.appendChild(lock);
+  }
 
   // ラベル
   const lbl = document.createElement('div');
@@ -257,20 +360,32 @@ function initModal() {
 function openModal(index) {
   if (index < 0 || index >= allCardItems.length) return;
 
-  const item    = allCardItems[index];
-  const overlay = document.getElementById('deck-modal');
-  const img     = document.getElementById('deck-modal-img');
-  const suitEl  = document.getElementById('deck-modal-suit');
-  const rankEl  = document.getElementById('deck-modal-rank');
-  const counter = document.getElementById('deck-modal-counter');
+  const item     = allCardItems[index];
+  const overlay  = document.getElementById('deck-modal');
+  const img      = document.getElementById('deck-modal-img');
+  const imgWrap  = document.getElementById('deck-modal-img-wrap');
+  const suitEl   = document.getElementById('deck-modal-suit');
+  const rankEl   = document.getElementById('deck-modal-rank');
+  const counter  = document.getElementById('deck-modal-counter');
 
   currentItemIndex = index;
 
-  // 画像フェード更新
-  img.style.opacity = '0';
-  img.onload  = () => { img.style.opacity = '1'; };
-  img.src     = item.dataset.src;
-  img.alt     = `${item.dataset.name} ${item.dataset.label}`;
+  if (item.dataset.complete === '1') {
+    // 完成絵: 単一画像ではなく、今デッキにセットされている13枚を重ねて表示する
+    img.style.display = 'none';
+    if (typeof renderSuitCompositeLayers === 'function' && imgWrap) {
+      renderSuitCompositeLayers(imgWrap, item.dataset.suitKey);
+    }
+  } else {
+    if (typeof clearSuitCompositeLayers === 'function' && imgWrap) {
+      clearSuitCompositeLayers(imgWrap);
+    }
+    img.style.display = '';
+    img.style.opacity = '0';
+    img.onload = () => { img.style.opacity = '1'; };
+    img.src = item.dataset.src;
+    img.alt = `${item.dataset.name} ${item.dataset.label}`;
+  }
 
   suitEl.textContent = `${item.dataset.suit} ${item.dataset.name}`;
   suitEl.style.color = item.dataset.color;

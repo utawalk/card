@@ -152,6 +152,106 @@ html, body {
 }
 
 /* ======================================================
+   Lobby Deck Preview（現在のデッキの完成絵プレビュー）
+   deck.html の「Complete」タイルと同じ、実際にセットされている
+   13枚を重ねた合成絵を、4スート分ロビー上部に表示する。
+   ====================================================== */
+
+.lobby-deck-preview {
+  width: 100%;
+  max-width: 1080px;
+  margin-bottom: 36px;
+  animation: card-rise 0.6s var(--ease-spring) 0.15s both;
+}
+
+.lobby-deck-preview-hint {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.lobby-deck-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.lobby-deck-preview-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(212,175,55,0.04);
+  border: 1px solid rgba(212,175,55,0.25);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-spring),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+}
+
+.lobby-deck-preview-tile:hover {
+  transform: translateY(-6px) scale(1.03);
+  border-color: rgba(212,175,55,0.55);
+  box-shadow: 0 16px 36px rgba(212,175,55,0.25);
+  z-index: 2;
+}
+
+.lobby-deck-preview-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    transparent 30%,
+    rgba(212,175,55,0.08) 50%,
+    transparent 70%
+  );
+  background-size: 200% 200%;
+  animation: shimmer 3.6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 200%; }
+  50%  { background-position: 0% 0%; }
+  100% { background-position: 200% 200%; }
+}
+
+.lobby-deck-preview-imgwrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.lobby-deck-preview-label {
+  position: relative;
+  z-index: 2;
+  padding: 8px 10px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  color: var(--gold);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  text-shadow: 0 0 8px rgba(212,175,55,0.4);
+}
+
+@media (max-width: 560px) {
+  .lobby-deck-preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ======================================================
    Game Grid Section
    ====================================================== */
 
@@ -527,6 +627,20 @@ html, body {
 }
 
 /* ======================================================
+   スート完成絵の合成レイヤー（全ページ共通）
+   グレー/カラーが混在するデッキでも、実際にセットされているカードの
+   絵をそのまま重ねて表示するための共通クラス。
+   ====================================================== */
+.suit-composite-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ======================================================
    Collection / Utility Nav（カードギャラリーへの導線）
    ====================================================== */
 
@@ -619,6 +733,33 @@ html, body {
   opacity: 1;
 }
 
+/* ガチャリンク: 少し差別化した配色 */
+.collection-link-gacha {
+  margin-top: 14px;
+  background: linear-gradient(135deg, rgba(167,139,250,0.14), var(--surface) 60%);
+  border-color: rgba(167,139,250,0.35);
+}
+
+.collection-link-gacha:hover {
+  border-color: rgba(167,139,250,0.75);
+  box-shadow:
+    0 26px 64px rgba(0,0,0,0.65),
+    0 0 36px rgba(167,139,250,0.28);
+}
+
+.collection-link-gacha .collection-link-icon {
+  background: radial-gradient(circle, rgba(167,139,250,0.28) 0%, rgba(167,139,250,0.06) 70%);
+  border-color: rgba(167,139,250,0.4);
+}
+
+.collection-link-gacha .collection-link-title {
+  color: #c4b5fd;
+}
+
+.collection-link-gacha .collection-link-arrow {
+  color: #a78bfa;
+}
+
 /* ======================================================
    Footer
    ====================================================== */
@@ -631,6 +772,22 @@ html, body {
   letter-spacing: 3px;
   color: var(--text-muted);
   animation: fade-in 0.8s 0.8s ease both;
+}
+
+.debug-footer-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  text-decoration: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.debug-footer-link:hover {
+  opacity: 1;
+  color: var(--text-sub);
 }
 
 /* ======================================================

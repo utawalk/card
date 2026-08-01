@@ -7,7 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
   initGameCardEffects();
   loadSaveStats();  // セーブデータをロビーに表示
   updateCoinDisplay();
+  renderDeckPreview(); // 今のデッキの完成絵プレビュー（4スート）
+  initSuitBgm();    // スートの絵にマウスオーバーでBGM再生
 });
+
+/** ロビー上部に、現在デッキにセットされている各スートの完成絵（合成レイヤー）を表示する */
+function renderDeckPreview() {
+  if (typeof renderSuitCompositeLayers !== 'function') return;
+  document.querySelectorAll('.lobby-deck-preview-imgwrap[data-suit-img]').forEach(wrap => {
+    const suit = wrap.dataset.suitImg;
+    if (suit) renderSuitCompositeLayers(wrap, suit);
+  });
+}
 
 /** ヘッダーのコイン所持数表示を更新する */
 function updateCoinDisplay() {
@@ -223,4 +234,83 @@ function loadSaveStats() {
 
   // クリア回数 / プレイ回数
   elWins.textContent = `${rec.gamesWon} / ${rec.gamesPlayed}`;
+}
+
+
+// ============================================================
+//  スートBGM — ロビー上部のスート絵にマウスオーバーで再生
+// ============================================================
+
+// data-suit の値 → BGMファイルパス（sound/bgm フォルダ内のファイル名の頭にスート名）
+const SUIT_BGM_FILES = {
+  spades:   'sound/bgm/spades_迷子迷子のお嬢さん.mp3',
+  hearts:   'sound/bgm/hearts_MusMus-BGM-167.mp3',
+  clubs:    'sound/bgm/clubs_sweet_tooth.mp3',
+  diamonds: 'sound/bgm/diamonds_私の薔薇には棘がない_2.mp3',
+};
+
+const SUIT_BGM_VOLUME = 0.5;
+const SUIT_BGM_FADE_MS = 250;
+
+const suitBgmAudios = {};   // suit -> HTMLAudioElement（一度作ったら使い回す）
+let   suitBgmActive  = null; // 現在再生中のスート名
+
+function initSuitBgm() {
+  document.querySelectorAll('.lobby-deck-preview-tile[data-suit]').forEach(tile => {
+    const suit = tile.dataset.suit;
+    if (!SUIT_BGM_FILES[suit]) return;
+
+    tile.addEventListener('mouseenter', () => playSuitBgm(suit));
+    tile.addEventListener('mouseleave', () => stopSuitBgm(suit));
+  });
+}
+
+function getSuitBgmAudio(suit) {
+  if (!suitBgmAudios[suit]) {
+    const audio = new Audio(SUIT_BGM_FILES[suit]);
+    audio.loop    = true;
+    audio.volume  = 0;
+    audio.preload = 'auto';
+    suitBgmAudios[suit] = audio;
+  }
+  return suitBgmAudios[suit];
+}
+
+function playSuitBgm(suit) {
+  // 既に別のスートのBGMが鳴っていたら即座に止める
+  if (suitBgmActive && suitBgmActive !== suit) {
+    stopSuitBgm(suitBgmActive, true);
+  }
+  suitBgmActive = suit;
+
+  const audio = getSuitBgmAudio(suit);
+  audio.play().catch(() => { /* ブラウザの自動再生制限などは無視 */ });
+  fadeSuitBgmVolume(audio, SUIT_BGM_VOLUME, SUIT_BGM_FADE_MS);
+}
+
+function stopSuitBgm(suit, immediate) {
+  const audio = suitBgmAudios[suit];
+  if (!audio) return;
+  if (suitBgmActive === suit) suitBgmActive = null;
+
+  fadeSuitBgmVolume(audio, 0, immediate ? 80 : SUIT_BGM_FADE_MS, () => {
+    audio.pause();
+    audio.currentTime = 0;
+  });
+}
+
+function fadeSuitBgmVolume(audio, target, duration, onDone) {
+  clearInterval(audio._suitBgmFadeTimer);
+
+  const start     = audio.volume;
+  const startTime = performance.now();
+
+  audio._suitBgmFadeTimer = setInterval(() => {
+    const t = Math.min(1, (performance.now() - startTime) / duration);
+    audio.volume = start + (target - start) * t;
+    if (t >= 1) {
+      clearInterval(audio._suitBgmFadeTimer);
+      if (onDone) onDone();
+    }
+  }, 30);
 }

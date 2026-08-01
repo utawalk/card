@@ -192,6 +192,7 @@ function triggerFoundationEffect(suit, rank, pileIndex) {
 
   // 0. 効果音
   playFoundationSound(rank, suit);
+  playFoundationBgm(suit); // このスートのBGMに切り替え（別スートなら自動で乗り換え）
 
   // 1. カードのフラッシュ光エフェクト
   triggerCardFlash(pileEl, theme);
@@ -204,7 +205,7 @@ function triggerFoundationEffect(suit, rank, pileIndex) {
 
   // 3.5 パワー加点ポップアップ（カードのパワーがそのまま得点として加算される）
   // カードの近く（フォンデーション）だと見えづらいため、完成途中の絵（絵合わせ演出）の近くに表示する
-  const power = (typeof getCardPower === 'function') ? getCardPower(suit, rank) : null;
+  const power = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(suit, rank) : null;
   if (power !== null) {
     const revealFrame = document.getElementById('suit-reveal-frame');
     let scoreX = centerX;
@@ -342,8 +343,8 @@ function triggerKingEffect(theme) {
 //  スーツ絵積み重ね演出
 // ============================================================
 
-// 絵合わせ素材のサブフォルダ名（images/cards/{スート}/A001_pitc/ 配下）
-const SUIT_PIC_SUBDIR = 'A001_pitc';
+// 絵合わせ素材のパス。カードが今デッキでグレーかカラーかに応じて
+// 対応する素材（A000_pitc / A001_pitc）を自動で使い分ける（js/cards.js）。
 
 // カードランクの順序（ファイル名は A.png, 2.png, ..., 10.png, J.png, Q.png, K.png）
 const RANK_ORDER = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -353,9 +354,16 @@ function rankToFileName(rank) {
   return rank;
 }
 
-// images/cards/{スート}/A001_pitc/{ランク}.png のパスを返す
+// カード（またはスート完成絵 'all'）に対応する絵合わせ素材のパスを返す
 function suitPicPath(suit, fileRank) {
-  return `images/cards/${suit}/${SUIT_PIC_SUBDIR}/${fileRank}.png`;
+  if (fileRank === 'all') {
+    return (typeof getSuitCompletePicturePath === 'function')
+      ? getSuitCompletePicturePath(suit)
+      : `images/cards/${suit}/A000_pitc/all.png`;
+  }
+  return (typeof getCardPicturePath === 'function')
+    ? getCardPicturePath(suit, fileRank)
+    : `images/cards/${suit}/A000_pitc/${fileRank}.png`;
 }
 
 // スートごとの現在レイヤー状態を保持
@@ -496,23 +504,19 @@ function triggerSuitLayerReveal(suit, rank) {
     });
   });
 
-  // Kが完成したら長め表示 + all.pngを最上位に追加
+  // Kが完成したら長め表示 + 最上位レイヤーにグロー効果
   const displayDuration = (rank === 'K') ? 4000 : 2200;
 
   if (rank === 'K') {
-    // all.png（完成絵）を最上レイヤーとして追加し、背景も切り替える
+    // 既にレイヤー・背景ともに「今デッキにセットされている13枚を正しく
+    // 重ねた状態」になっているため、別の完成絵に差し替える必要はない。
+    // 最上位レイヤー（K）にグロー効果だけ追加して演出を強調する。
     setTimeout(() => {
-      const allImg = document.createElement('img');
-      allImg.className = 'suit-layer';
-      allImg.src = suitPicPath(suit, 'all');
-      allImg.alt = `${suit} complete`;
-      allImg.style.filter =
-        `drop-shadow(0 0 20px ${theme.primary}) drop-shadow(0 0 40px ${theme.secondary})`;
-      layersEl.appendChild(allImg);
-      // 背景も完成絵 all.png に統一する
-      const allPath = suitPicPath(suit, 'all');
-      state.lastLayerImg = allPath;
-      updateGameBackground([allPath]);
+      const topImg = layersEl.lastElementChild;
+      if (topImg) {
+        topImg.style.filter =
+          `drop-shadow(0 0 20px ${theme.primary}) drop-shadow(0 0 40px ${theme.secondary})`;
+      }
     }, 400);
   }
 
@@ -584,30 +588,116 @@ const SUITS_ORDER = ['spades', 'hearts', 'clubs', 'diamonds'];
 
 /**
  * 勝利画面を表示する前に4スートの「最良の絵」をセットする。
- * Kまで完成していれば card_all.png、途中なら最新レイヤー、
- * 1枚も置いていなければ空（非表示）。
+ * Kまで完成していれば「今デッキにセットされている13枚を重ねた合成絵」、
+ * 途中なら最新レイヤー画像を使う。
  */
 function setupVictoryArt() {
   SUITS_ORDER.forEach(suit => {
     const cardEl = document.querySelector(`#victory-completed-art .victory-art-card[data-suit="${suit}"]`);
     if (!cardEl) return;
 
-    const state = suitLayerState[suit];
-    const imgEl = cardEl.querySelector('.victory-art-img');
+    const state   = suitLayerState[suit];
+    const imgEl   = cardEl.querySelector('.victory-art-img');
+    const imgWrap = cardEl.querySelector('.victory-art-img-wrap');
 
-    if (state.layerCount === 0) {
-      // 1枚も置いていない（通常は全スート完成しているはずだが念のため）
-      imgEl.src = suitPicPath(suit, 'all');
+    if (state.layerCount === 0 || state.layerCount >= 13) {
+      // 完成している（または通常あり得ないが念のため未着手）→
+      // 今デッキにセットされている13枚を実際に重ねて表示する
       cardEl.classList.remove('partial');
-    } else if (state.layerCount >= 13) {
-      // K（13枚）まで完成 → all.png
-      imgEl.src = suitPicPath(suit, 'all');
-      cardEl.classList.remove('partial');
+      imgEl.style.display = 'none';
+      if (typeof renderSuitCompositeLayers === 'function' && imgWrap) {
+        renderSuitCompositeLayers(imgWrap, suit);
+      } else {
+        imgEl.style.display = '';
+        imgEl.src = suitPicPath(suit, 'all');
+      }
     } else {
       // 途中段階 → 最新レイヤー画像
+      if (typeof clearSuitCompositeLayers === 'function' && imgWrap) {
+        clearSuitCompositeLayers(imgWrap);
+      }
+      imgEl.style.display = '';
       const latestRank = RANK_ORDER[state.layerCount - 1];
       imgEl.src = suitPicPath(suit, latestRank);
       cardEl.classList.add('partial');
     }
   });
+}
+
+
+// ============================================================
+//  ファウンデーションBGM — 置いたカードのスートに応じて流れる
+//  （別スートのカードが置かれると自動で切り替わる）
+// ============================================================
+
+const FOUNDATION_BGM_FILES = {
+  spades:   'sound/bgm/spades_迷子迷子のお嬢さん.mp3',
+  hearts:   'sound/bgm/hearts_MusMus-BGM-167.mp3',
+  clubs:    'sound/bgm/clubs_sweet_tooth.mp3',
+  diamonds: 'sound/bgm/diamonds_私の薔薇には棘がない_2.mp3',
+};
+
+const FOUNDATION_BGM_VOLUME  = 0.45;
+const FOUNDATION_BGM_FADE_MS = 400;
+
+const foundationBgmAudios = {}; // suit -> HTMLAudioElement（使い回し）
+let   foundationBgmActive  = null; // 現在再生中のスート名
+
+function getFoundationBgmAudio(suit) {
+  if (!foundationBgmAudios[suit]) {
+    const audio = new Audio(FOUNDATION_BGM_FILES[suit]);
+    audio.loop    = true;
+    audio.volume  = 0;
+    audio.preload = 'auto';
+    foundationBgmAudios[suit] = audio;
+  }
+  return foundationBgmAudios[suit];
+}
+
+/** フォンデーションに置かれたカードのスートのBGMを再生する（すでに同じスートが鳴っていれば何もしない） */
+function playFoundationBgm(suit) {
+  if (!FOUNDATION_BGM_FILES[suit] || foundationBgmActive === suit) return;
+
+  // 別のスートが鳴っていたら切り替え
+  if (foundationBgmActive) {
+    fadeFoundationBgm(foundationBgmAudios[foundationBgmActive], 0, FOUNDATION_BGM_FADE_MS, (a) => {
+      a.pause();
+      a.currentTime = 0;
+    });
+  }
+
+  foundationBgmActive = suit;
+  const audio = getFoundationBgmAudio(suit);
+  audio.play().catch(() => { /* 自動再生制限は無視 */ });
+  fadeFoundationBgm(audio, FOUNDATION_BGM_VOLUME, FOUNDATION_BGM_FADE_MS);
+}
+
+/** ファウンデーションBGMを止める（新しいゲームを始めたときなど） */
+function stopFoundationBgm() {
+  if (!foundationBgmActive) return;
+  const audio = foundationBgmAudios[foundationBgmActive];
+  foundationBgmActive = null;
+  if (!audio) return;
+
+  fadeFoundationBgm(audio, 0, 200, (a) => {
+    a.pause();
+    a.currentTime = 0;
+  });
+}
+
+function fadeFoundationBgm(audio, target, duration, onDone) {
+  if (!audio) return;
+  clearInterval(audio._foundationBgmFadeTimer);
+
+  const start     = audio.volume;
+  const startTime = performance.now();
+
+  audio._foundationBgmFadeTimer = setInterval(() => {
+    const t = Math.min(1, (performance.now() - startTime) / duration);
+    audio.volume = start + (target - start) * t;
+    if (t >= 1) {
+      clearInterval(audio._foundationBgmFadeTimer);
+      if (onDone) onDone(audio);
+    }
+  }, 30);
 }

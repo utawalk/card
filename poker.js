@@ -568,7 +568,7 @@ function renderCPUs() {
         const wasBack = slots[i].src.includes('back');
         const revealNow = G.revealCPU && G.phase === 'showdown' && !G.folded[p];
         const newSrc = revealNow
-          ? `images/cards/${card.suit}/A001_card/${card.rank}.png`
+          ? ((typeof getCardImagePath === 'function') ? getCardImagePath(card.suit, card.rank) : `images/cards/${card.suit}/A000_card/${card.rank}.png`)
           : 'images/cards/back.png';
         if (slots[i].src !== newSrc) {
           slots[i].src = newSrc;
@@ -597,7 +597,7 @@ function renderCommunity() {
     if (i < (G.community?.length ?? 0)) {
       const card = G.community[i];
       const img  = document.createElement('img');
-      img.src    = `images/cards/${card.suit}/A001_card/${card.rank}.png`;
+      img.src    = (typeof getCardImagePath === 'function') ? getCardImagePath(card.suit, card.rank) : `images/cards/${card.suit}/A000_card/${card.rank}.png`;
       img.alt    = `${card.rank} of ${card.suit}`;
       img.className = 'comm-card-img';
       slot.appendChild(img);
@@ -622,7 +622,7 @@ function renderPlayerHand() {
     const card = G.hands?.[0]?.[i];
     if (!card) return;
     const img  = document.createElement('img');
-    img.src    = `images/cards/${card.suit}/A001_card/${card.rank}.png`;
+    img.src    = (typeof getCardImagePath === 'function') ? getCardImagePath(card.suit, card.rank) : `images/cards/${card.suit}/A000_card/${card.rank}.png`;
     img.alt    = `${card.rank} of ${card.suit}`;
     img.draggable = false;
     slot.appendChild(img);

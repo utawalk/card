@@ -85,10 +85,9 @@
 }
 
 .deck-page-sub {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-muted);
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin-top: 3px;
 }
 
@@ -127,6 +126,30 @@
 .deck-suit-btn.heart:hover   { box-shadow: 0 6px 16px rgba(248,113,113,0.4); border-color: rgba(248,113,113,0.4); }
 .deck-suit-btn.club:hover    { box-shadow: 0 6px 16px rgba( 52,211,153,0.4); border-color: rgba( 52,211,153,0.4); }
 .deck-suit-btn.diamond:hover { box-shadow: 0 6px 16px rgba(251,191, 36,0.4); border-color: rgba(251,191, 36,0.4); }
+
+/* ガチャへのショートカットボタン */
+.deck-gacha-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #c4b5fd;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(167,139,250,0.35);
+  background: rgba(167,139,250,0.10);
+  transition: transform 0.25s var(--ease-spring), background 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.deck-gacha-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(167,139,250,0.18);
+  box-shadow: 0 8px 20px rgba(167,139,250,0.3);
+}
 
 /* ======================================================
    Main Content
@@ -218,6 +241,80 @@
    Card Grid
    ====================================================== */
 
+/* ======================================================
+   パワー合計サマリー
+   ====================================================== */
+
+.deck-power-summary {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  max-width: 1080px;
+  margin: 20px auto 0;
+  padding: 0 24px;
+}
+
+.deck-power-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+.deck-power-tile-symbol {
+  font-size: 18px;
+  color: var(--suit-color, var(--gold));
+}
+
+.deck-power-tile-label {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.deck-power-tile-value {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: 'Cinzel', serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.deck-power-tile-icon {
+  font-size: 13px;
+}
+
+.deck-power-tile-total {
+  background: linear-gradient(160deg, rgba(212,175,55,0.14), rgba(255,255,255,0.03));
+  border-color: rgba(212,175,55,0.4);
+}
+
+.deck-power-tile-total .deck-power-tile-symbol,
+.deck-power-tile-total .deck-power-tile-value {
+  color: var(--gold-light);
+}
+
+@media (max-width: 700px) {
+  .deck-power-summary {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .deck-power-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .deck-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -272,6 +369,36 @@
 .deck-suit-section[data-suit="diamonds"] .deck-card-item:hover {
   box-shadow: 0 16px 36px rgba(251,191, 36,0.25);
   border-color: rgba(251,191, 36,0.35);
+}
+
+/* ---- 所持状態（グレー=未入手 / カラー=所持済み） ---- */
+.deck-card-item.is-owned {
+  border-color: rgba(212,175,55,0.4);
+}
+
+.deck-card-item.is-locked .deck-card-img {
+  opacity: 0.75;
+}
+
+.deck-card-item.is-locked:hover {
+  transform: translateY(-4px) scale(1.02); /* ロック中は控えめなホバー */
+}
+
+.deck-card-lock {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(3px);
+  z-index: 2;
 }
 
 /* 画像ラッパー */
@@ -513,6 +640,7 @@
 
 /* 画像ラッパー */
 .deck-modal-img-wrap {
+  position: relative;
   width: 100%;
   max-width: 380px;
   aspect-ratio: 1 / 1;

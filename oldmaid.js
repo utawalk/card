@@ -449,7 +449,7 @@ function createCardElement(card) {
   const el = document.createElement('div');
   el.className = 'hand-card';
   const img = document.createElement('img');
-  img.src = `images/cards/${card.suit}/A001_card/${card.rank}.png`;
+  img.src = (typeof getCardImagePath === 'function') ? getCardImagePath(card.suit, card.rank) : `images/cards/${card.suit}/A000_card/${card.rank}.png`;
   img.alt = `${card.rank} of ${card.suit}`;
   img.draggable = false;
   el.appendChild(img);

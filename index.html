@@ -63,19 +63,27 @@
         <!-- 完成した4枚の絵 -->
         <div id="victory-completed-art">
           <div class="victory-art-card" data-suit="spades">
-            <img class="victory-art-img" src="" alt="Spades complete">
+            <div class="victory-art-img-wrap">
+              <img class="victory-art-img" src="" alt="Spades complete">
+            </div>
             <div class="victory-art-label">♠ Spades</div>
           </div>
           <div class="victory-art-card" data-suit="hearts">
-            <img class="victory-art-img" src="" alt="Hearts complete">
+            <div class="victory-art-img-wrap">
+              <img class="victory-art-img" src="" alt="Hearts complete">
+            </div>
             <div class="victory-art-label">♥ Hearts</div>
           </div>
           <div class="victory-art-card" data-suit="clubs">
-            <img class="victory-art-img" src="" alt="Clubs complete">
+            <div class="victory-art-img-wrap">
+              <img class="victory-art-img" src="" alt="Clubs complete">
+            </div>
             <div class="victory-art-label">♣ Clubs</div>
           </div>
           <div class="victory-art-card" data-suit="diamonds">
-            <img class="victory-art-img" src="" alt="Diamonds complete">
+            <div class="victory-art-img-wrap">
+              <img class="victory-art-img" src="" alt="Diamonds complete">
+            </div>
             <div class="victory-art-label">♦ Diamonds</div>
           </div>
         </div>
@@ -115,8 +123,13 @@
         <div class="deadlock-icon">🚫</div>
         <h2 style="font-size: 48px; margin: 15px 0;">手なし</h2>
         <p>これ以上動かせるカードがありません。</p>
+        <div class="deadlock-stats">
+          <span id="deadlock-score">Score: 0</span>
+        </div>
+        <div id="deadlock-coins-earned" class="victory-coins-earned"></div>
         <div class="deadlock-actions">
           <button id="deadlock-new-game-btn" class="btn primary-btn" style="font-size: 18px; padding: 12px 24px;">次のゲームを始める</button>
+          <a href="lobby.html" class="btn back-btn small" id="deadlock-lobby-btn">← ロビーに戻る</a>
         </div>
       </div>
     </div>

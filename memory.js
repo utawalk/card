@@ -156,7 +156,7 @@ function buildGrid() {
     const reveal = document.createElement('div');
     reveal.className = 'card-side card-reveal';
     const frontImg = document.createElement('img');
-    frontImg.src = `images/cards/${card.suit}/A001_card/${card.rank}.png`;
+    frontImg.src = (typeof getCardImagePath === 'function') ? getCardImagePath(card.suit, card.rank) : `images/cards/${card.suit}/A000_card/${card.rank}.png`;
     frontImg.alt   = `${card.rank} of ${card.suit}`;
     frontImg.draggable = false;
     reveal.appendChild(frontImg);

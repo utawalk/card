@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>カード一覧 — Card Games</title>
-  <meta name="description" content="ゲームで使われているトランプの表面デザインと、揃えると完成する絵を4スート × 13枚 + 完成絵で一覧表示します。">
+  <title>今のデッキ — Card Games</title>
+  <meta name="description" content="現在デッキにセットされているカード（グレー/カラー）を4スート × 13枚で一覧表示します。カラーカードはガチャで入手できます。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,8 +24,8 @@
         <span>ロビーへ戻る</span>
       </a>
       <div class="deck-title-wrap">
-        <h1 class="deck-page-title">🎴 Playing Cards</h1>
-        <p class="deck-page-sub">4 Suits &times; 13 Cards + Complete Art</p>
+        <h1 class="deck-page-title">🎴 今のデッキ</h1>
+        <p class="deck-page-sub" id="deck-owned-progress">Loading…</p>
       </div>
       <!-- スーツジャンプリンク -->
       <nav class="deck-suit-nav" aria-label="スーツジャンプ">
@@ -34,7 +34,17 @@
         <a href="#suit-clubs"    class="deck-suit-btn club"    id="nav-clubs"    title="Clubs">♣</a>
         <a href="#suit-diamonds" class="deck-suit-btn diamond" id="nav-diamonds" title="Diamonds">♦</a>
       </nav>
+      <a href="gacha.html" class="deck-gacha-btn" title="カードガチャへ">🎁 ガチャ</a>
+      <div class="coin-badge" id="coin-badge">
+        <span class="coin-icon">🪙</span>
+        <span class="coin-amount" id="coin-amount">0</span>
+      </div>
     </header>
+
+    <!-- パワー合計サマリー -->
+    <section class="deck-power-summary" id="deck-power-summary">
+      <!-- JS で動的生成 -->
+    </section>
 
     <!-- カード一覧 -->
     <main class="deck-main" id="deck-main">
@@ -59,7 +69,7 @@
       <button class="deck-modal-close" id="deck-modal-close" aria-label="閉じる">✕</button>
 
       <!-- カード画像 -->
-      <div class="deck-modal-img-wrap">
+      <div class="deck-modal-img-wrap" id="deck-modal-img-wrap">
         <img class="deck-modal-img" id="deck-modal-img" src="" alt="">
       </div>
 
@@ -75,6 +85,7 @@
   </div>
 
   <script src="js/cards.js"></script>
+  <script src="js/save.js"></script>
   <script src="deck.js"></script>
 </body>
 </html>

@@ -362,7 +362,7 @@ function renderBoard() {
           slot.appendChild(img);
         }
         if (img.dataset.rank !== rank || img.dataset.suit !== suit) {
-          img.src = `images/cards/${suit}/A001_card/${rank}.png`;
+          img.src = (typeof getCardImagePath === 'function') ? getCardImagePath(suit, rank) : `images/cards/${suit}/A000_card/${rank}.png`;
           img.alt = `${rank} of ${suit}`;
           img.dataset.rank = rank;
           img.dataset.suit = suit;
@@ -459,7 +459,7 @@ function renderHand() {
     }
 
     const img = document.createElement('img');
-    img.src       = `images/cards/${card.suit}/A001_card/${card.rank}.png`;
+    img.src       = (typeof getCardImagePath === 'function') ? getCardImagePath(card.suit, card.rank) : `images/cards/${card.suit}/A000_card/${card.rank}.png`;
     img.alt       = `${card.rank} of ${card.suit}`;
     img.draggable = false;
     cardEl.appendChild(img);
@@ -697,7 +697,8 @@ function playSound(type) {
 //  「揃ったランクの集合」で管理し、A→Kの順に重ねて描画する。
 // ============================================================
 
-const SUIT_PIC_SUBDIR = 'A001_pitc';
+// 絵合わせ素材のパスは js/cards.js の getCardPicturePath/getSuitCompletePicturePath が
+// カードの所持状態（グレー/カラー）に応じて自動で切り替える
 const SUIT_PIC_THEME = {
   spades:   { color: '#a78bfa', emoji: '♠', label: 'Spades' },
   hearts:   { color: '#f87171', emoji: '♥', label: 'Hearts' },
@@ -711,7 +712,14 @@ function rankToFileName(rank) {
 }
 
 function suitPicPath(suit, fileRank) {
-  return `images/cards/${suit}/${SUIT_PIC_SUBDIR}/${fileRank}.png`;
+  if (fileRank === 'all') {
+    return (typeof getSuitCompletePicturePath === 'function')
+      ? getSuitCompletePicturePath(suit)
+      : `images/cards/${suit}/A000_pitc/all.png`;
+  }
+  return (typeof getCardPicturePath === 'function')
+    ? getCardPicturePath(suit, fileRank)
+    : `images/cards/${suit}/A000_pitc/${fileRank}.png`;
 }
 
 // スートごとに「これまで場に出たランク」を記録
@@ -797,15 +805,14 @@ function triggerSuitPictureReveal(suit, rank) {
   const displayDuration = complete ? 4000 : 1800;
 
   if (complete) {
-    // 完成絵（card_all.png）を最上レイヤーとして追加し、背景も統一する
+    // 既にレイヤー・背景ともに「今デッキにセットされている13枚を正しく
+    // 重ねた状態」になっているため、別の完成絵に差し替える必要はない。
+    // 最上位レイヤーにグロー効果だけ追加して演出を強調する。
     setTimeout(() => {
-      const allImg = document.createElement('img');
-      allImg.className = 'suit-layer';
-      allImg.src = suitPicPath(suit, 'all');
-      allImg.alt = `${suit} complete`;
-      allImg.style.filter = `drop-shadow(0 0 20px ${theme.color})`;
-      layersEl.appendChild(allImg);
-      updateGameBackground([suitPicPath(suit, 'all')]);
+      const topImg = layersEl.lastElementChild;
+      if (topImg) {
+        topImg.style.filter = `drop-shadow(0 0 20px ${theme.color})`;
+      }
     }, 400);
   }
 

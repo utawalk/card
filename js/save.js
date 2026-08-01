@@ -179,3 +179,121 @@ function Wallet_addCoins(amount) {
   if (amt > 0) SaveData_patch('wallet', { coins: next });
   return next;
 }
+
+/**
+ * コインを消費する（所持数が足りない場合は失敗する）
+ * @param {number} amount 消費するコイン数
+ * @returns {{ success: boolean, coinsTotal: number }}
+ */
+function Wallet_spendCoins(amount) {
+  const amt = Math.max(0, Math.round(amount || 0));
+  const current = Wallet_getCoins();
+  if (amt <= 0 || current < amt) {
+    return { success: false, coinsTotal: current };
+  }
+  const next = current - amt;
+  SaveData_patch('wallet', { coins: next });
+  return { success: true, coinsTotal: next };
+}
+
+// ------------------------------------------------------------
+//  カードコレクション（ガチャで手に入れたカラーカードの所持状態）
+//  デフォルトでは全カードがグレー（A000_card）。
+//  ガチャでカラー（A001_card）を引くと、そのカードは自動的に
+//  「デッキにセット」された状態＝ Collection に owned=true として記録される。
+// ------------------------------------------------------------
+
+const COLLECTION_DEFAULTS = { owned: {} };
+
+/** スート・ランクから所持状態の管理キーを作る */
+function Collection_key(suit, rank) {
+  return `${suit}_${rank}`;
+}
+
+/**
+ * 指定したカードがカラー版（ガチャ入手済み）かどうかを返す
+ * @param {string} suit
+ * @param {string} rank
+ * @returns {boolean}
+ */
+function Collection_isOwned(suit, rank) {
+  const data = SaveData_get('collection', COLLECTION_DEFAULTS);
+  return !!data.owned[Collection_key(suit, rank)];
+}
+
+/**
+ * 指定したカードをカラー版として解放する（＝デッキに自動セット）
+ * @param {string} suit
+ * @param {string} rank
+ * @returns {{ alreadyOwned: boolean }} 既に持っていたか
+ */
+function Collection_unlock(suit, rank) {
+  const data = SaveData_get('collection', COLLECTION_DEFAULTS);
+  const key = Collection_key(suit, rank);
+  const alreadyOwned = !!data.owned[key];
+  if (!alreadyOwned) {
+    const nextOwned = Object.assign({}, data.owned, { [key]: true });
+    SaveData_patch('collection', { owned: nextOwned });
+  }
+  return { alreadyOwned };
+}
+
+/** カラー化済みカードの枚数を返す */
+function Collection_getOwnedCount() {
+  const data = SaveData_get('collection', COLLECTION_DEFAULTS);
+  return Object.values(data.owned).filter(Boolean).length;
+}
+
+/** 所持状態の生データ（{ "spades_A": true, ... }）を返す */
+function Collection_getAll() {
+  return SaveData_get('collection', COLLECTION_DEFAULTS).owned;
+}
+
+/**
+ * 指定したカードのカラー所持状態を解除する（デバッグ用）
+ * @param {string} suit
+ * @param {string} rank
+ */
+function Collection_lock(suit, rank) {
+  const data = SaveData_get('collection', COLLECTION_DEFAULTS);
+  const key = Collection_key(suit, rank);
+  if (data.owned[key]) {
+    const nextOwned = Object.assign({}, data.owned);
+    delete nextOwned[key];
+    SaveData_patch('collection', { owned: nextOwned });
+  }
+}
+
+// ------------------------------------------------------------
+//  デバッグ用ユーティリティ
+// ------------------------------------------------------------
+
+/**
+ * 所持コインを指定した金額に直接設定する（デバッグ用）
+ * @param {number} amount
+ * @returns {number} 設定後の所持コイン数
+ */
+function Wallet_setCoins(amount) {
+  const amt = Math.max(0, Math.round(amount || 0));
+  SaveData_patch('wallet', { coins: amt });
+  return amt;
+}
+
+/** ソリティアの記録をリセットする（デバッグ用） */
+function Solitaire_resetRecord() {
+  SaveData_patch('solitaire', SOLITAIRE_DEFAULTS);
+}
+
+/**
+ * 手詰まり（ゲームオーバー）時に呼ぶ。クリアではないのでハイスコア等は更新しないが、
+ * それまでに獲得したスコアに応じて控えめにコインを付与する。
+ * @param {number} score  ゲームオーバー時点のスコア
+ * @returns {{ coinsEarned: number, coinsTotal: number }}
+ */
+function Solitaire_onGameOver(score) {
+  // クリア時（Math.max(20, score/10) 相当）よりも控えめな換算率にする
+  const coinsEarned = Math.max(5, Math.round((score || 0) / 20));
+  const coinsTotal = Wallet_addCoins(coinsEarned);
+  return { coinsEarned, coinsTotal };
+}
+

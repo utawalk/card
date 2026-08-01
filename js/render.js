@@ -2,23 +2,24 @@
 
 // ============================================================
 //  Card Image Configuration
-//  スート別フォルダの中の A001_card サブフォルダに1枚ずつPNGを配置する構成。
-//  画像を差し替えたいときは images/cards/{スート名}/A001_card/{ランク}.png を
-//  同じファイル名のまま上書きするだけでOK（コード変更不要）。
-//  例: images/cards/spades/A001_card/A.png, images/cards/hearts/A001_card/10.png
+//  デフォルトはグレー版（A000_card）。ガチャでカラー版（A001_card）を
+//  引いたカードだけ、js/cards.js の getCardImagePath() が自動でカラー画像を返す。
 // ============================================================
 const CARD_IMAGE_DIR = 'images/cards';       // カード画像フォルダ
-const CARD_FACE_SUBDIR = 'A001_card';        // 表面画像のサブフォルダ名
 const CARD_IMAGE_EXT = '.png';               // 画像拡張子（.png, .jpg, .webp にも変更可）
 const CARD_BACK_FILE = 'back';               // 裏面ファイル名（拡張子なし、images/cards/直下）
 
 /**
- * カードの表面画像URLを返す
+ * カードの表面画像URLを返す（所持状態に応じてグレー/カラーを自動判定）
  * @param {Card} card
- * @returns {string} 例: "images/cards/hearts/A001_card/A.png"
+ * @returns {string} 例: "images/cards/hearts/A000_card/A.png"
  */
 function getCardFaceUrl(card) {
-  return `${CARD_IMAGE_DIR}/${card.suit}/${CARD_FACE_SUBDIR}/${card.rank}${CARD_IMAGE_EXT}`;
+  if (typeof getCardImagePath === 'function') {
+    return getCardImagePath(card.suit, card.rank);
+  }
+  // フォールバック（cards.js未読込時）
+  return `${CARD_IMAGE_DIR}/${card.suit}/A000_card/${card.rank}${CARD_IMAGE_EXT}`;
 }
 
 /**
@@ -113,6 +114,11 @@ function renderBoard() {
       }
     }
   });
+
+  // 盤面が変化するたびに必ず手詰まり判定を行う（個別のハンドラでの呼び忘れを防ぐ）
+  if (typeof scheduleDeadlockCheck === 'function') {
+    scheduleDeadlockCheck();
+  }
 }
 
 // Render Stock
@@ -278,7 +284,26 @@ function hideVictory() {
 }
 
 function showDeadlock() {
-  document.getElementById('deadlock-overlay').classList.remove('hidden');
+  const overlay = document.getElementById('deadlock-overlay');
+  if (!overlay) return;
+
+  // 既に表示中なら再実行しない（コイン二重付与を防止）
+  if (!overlay.classList.contains('hidden')) return;
+
+  const scoreEl = document.getElementById('deadlock-score');
+  if (scoreEl) scoreEl.textContent = `Score: ${GameState.score}`;
+
+  // ---- コイン付与（クリアではないので控えめな換算） ----
+  if (typeof Solitaire_onGameOver === 'function') {
+    const result = Solitaire_onGameOver(GameState.score);
+    const coinsEl = document.getElementById('deadlock-coins-earned');
+    if (coinsEl) {
+      coinsEl.textContent = `🪙 +${result.coinsEarned} コイン獲得！（所持: ${result.coinsTotal.toLocaleString()}）`;
+    }
+    updateCoinDisplay();
+  }
+
+  overlay.classList.remove('hidden');
 }
 
 function hideDeadlock() {

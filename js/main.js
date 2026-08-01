@@ -139,6 +139,7 @@ function startNewGame() {
   clearHint();
   clearTimeout(deadlockCheckTimer);
   clearTimeout(autoFoundationTimer);
+  if (typeof stopFoundationBgm === 'function') stopFoundationBgm(); // 新しいゲームではファウンデーションBGMをリセット
   if (typeof resetSuitLayers === 'function') resetSuitLayers();
   dealGame();
   renderBoard();
@@ -367,7 +368,7 @@ function moveCardToFoundation(targetSuit) {
   const cards = removeCardsFromOrigin();
   GameState.foundations[targetSuit].push(cards[0]);
   // カードのパワーを得点として加算（今後カードごとにパワーを変える予定）
-  const power1 = (typeof getCardPower === 'function') ? getCardPower(targetSuit, cards[0].rank) : 10;
+  const power1 = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(targetSuit, cards[0].rank) : 10;
   GameState.score += power1;
 }
 
@@ -520,7 +521,7 @@ function handleCardClick(targetEl) {
     playSound('drop');
     GameState.moves++;
     // カードのパワーを得点として加算（今後カードごとにパワーを変える予定）
-    const power2 = (typeof getCardPower === 'function') ? getCardPower(card.suit, card.rank) : 10;
+    const power2 = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(card.suit, card.rank) : 10;
     GameState.score += power2;
     // エフェクト発火
     const foundIdx2 = SUITS.indexOf(card.suit);
@@ -564,7 +565,7 @@ function autoMoveToFoundation(cardId) {
   playSound('drop');
   GameState.moves++;
   // カードのパワーを得点として加算（今後カードごとにパワーを変える予定）
-  const power3 = (typeof getCardPower === 'function') ? getCardPower(card.suit, card.rank) : 10;
+  const power3 = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(card.suit, card.rank) : 10;
   GameState.score += power3;
 
   const foundIdx = SUITS.indexOf(card.suit);
@@ -582,9 +583,15 @@ function autoMoveToFoundation(cardId) {
 }
 
 // --- 手詰まりチェックを遅延実行（アニメーション完了後に判定） ---
+// 以前は「呼ばれるたびにタイマーをリセットする」実装だったため、
+// 手詰まり中にプレイヤーが色々なカードを試して連続でドラッグ操作
+// （失敗して弾かれる操作も含む）を行うと、タイマーが延々とリセットされ続けて
+// 判定が一向に実行されない不具合があった。
+// → 呼び出しのたびに独立したタイマーを積む方式にし、確実に一定時間後に
+//   判定が実行されるようにする（判定自体は常に最新のGameStateを見るため、
+//   複数のタイマーが積まれても無駄撃ちになるだけで害はない）。
 function scheduleDeadlockCheck() {
-  clearTimeout(deadlockCheckTimer);
-  deadlockCheckTimer = setTimeout(() => {
+  setTimeout(() => {
     if (!checkWinCondition() && checkDeadlock()) {
       showDeadlock();
     }
@@ -643,7 +650,16 @@ function runAutoFoundation() {
     }
   }
 
-  if (!card) return; // 移動できるカードなし
+  if (!card) {
+    // オートファンデーションでこれ以上動かせるカードがない。
+    // （オートは「フォンデーションへの移動」しか行わないため、これだけでは
+    //  手詰まりと確定しない → タブロー間の移動も含めた完全な判定を行う）
+    // 本当に手詰まりであれば、待たずにその場で強制的にウィンドウを表示する。
+    if (!checkWinCondition() && checkDeadlock()) {
+      showDeadlock();
+    }
+    return;
+  }
 
   // 状態を更新
   if (origin === 'talon') {
@@ -654,7 +670,7 @@ function runAutoFoundation() {
   GameState.foundations[card.suit].push(card);
   GameState.moves++;
   // カードのパワーを得点として加算（今後カードごとにパワーを変える予定）
-  const power4 = (typeof getCardPower === 'function') ? getCardPower(card.suit, card.rank) : 10;
+  const power4 = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(card.suit, card.rank) : 10;
   GameState.score += power4;
 
   playSound('drop');

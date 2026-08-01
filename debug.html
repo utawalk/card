@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>デバッグページ — Card Games</title>
+  <meta name="description" content="開発・確認用のデバッグページ。コインの追加やカードコレクションの変更、セーブデータのリセットができます。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="lobby.css">
+  <link rel="stylesheet" href="debug.css">
+</head>
+<body>
+  <div id="ambient-layer" aria-hidden="true"></div>
+
+  <div id="lobby-container" class="debug-page">
+
+    <!-- ヘッダー -->
+    <header class="debug-header">
+      <a href="lobby.html" class="debug-back-btn" id="back-to-lobby-btn">
+        <span class="debug-back-arrow">←</span>
+        <span>ロビーへ戻る</span>
+      </a>
+      <div class="debug-title-wrap">
+        <h1 class="debug-page-title">🛠 デバッグページ</h1>
+        <p class="debug-page-sub">開発・確認用（ゲームの進行には影響しません）</p>
+      </div>
+      <div class="coin-badge" id="coin-badge">
+        <span class="coin-icon">🪙</span>
+        <span class="coin-amount" id="coin-amount">0</span>
+      </div>
+    </header>
+
+    <main class="debug-main">
+
+      <p class="debug-warning">⚠ ここでの操作はブラウザのセーブデータ（localStorage）を直接書き換えます。本番プレイ中の端末では使わないでください。</p>
+
+      <!-- コイン管理 -->
+      <section class="debug-section">
+        <h2 class="debug-section-title">🪙 コイン管理</h2>
+        <p class="debug-section-desc">現在の所持コイン: <strong id="debug-coin-current">0</strong></p>
+        <div class="debug-btn-row">
+          <button class="debug-btn" data-add-coins="100">+100</button>
+          <button class="debug-btn" data-add-coins="1000">+1,000</button>
+          <button class="debug-btn" data-add-coins="10000">+10,000</button>
+        </div>
+        <div class="debug-inline-form">
+          <input type="number" id="debug-coin-custom" class="debug-input" placeholder="任意の金額" min="0" step="1">
+          <button class="debug-btn" id="debug-coin-add-custom">追加</button>
+          <button class="debug-btn" id="debug-coin-set-custom">この金額に設定</button>
+        </div>
+        <button class="debug-btn debug-btn-danger" id="debug-coin-reset">コインを0にリセット</button>
+      </section>
+
+      <!-- カードコレクション管理 -->
+      <section class="debug-section">
+        <h2 class="debug-section-title">🎴 カードコレクション管理</h2>
+        <p class="debug-section-desc">カラー化済み: <strong id="debug-collection-progress">0 / 52</strong></p>
+
+        <div class="debug-btn-row">
+          <button class="debug-btn debug-btn-primary" id="debug-unlock-all">全カードをカラー化</button>
+          <button class="debug-btn debug-btn-danger" id="debug-lock-all">全カードをグレーに戻す</button>
+        </div>
+
+        <div class="debug-suit-rows" id="debug-suit-rows">
+          <!-- JS で動的生成 -->
+        </div>
+
+        <h3 class="debug-subheading">カード個別トグル（クリックでカラー/グレー切り替え）</h3>
+        <div class="debug-card-grid" id="debug-card-grid">
+          <!-- JS で動的生成 -->
+        </div>
+      </section>
+
+      <!-- ソリティア記録 -->
+      <section class="debug-section">
+        <h2 class="debug-section-title">🏆 ソリティア記録</h2>
+        <div class="debug-stat-grid" id="debug-solitaire-stats">
+          <!-- JS で動的生成 -->
+        </div>
+        <button class="debug-btn debug-btn-danger" id="debug-solitaire-reset">ソリティアの記録をリセット</button>
+      </section>
+
+      <!-- セーブデータ全体 -->
+      <section class="debug-section">
+        <h2 class="debug-section-title">💾 セーブデータ全体</h2>
+        <p class="debug-section-desc">現在保存されている全データ（JSON）</p>
+        <textarea class="debug-json-view" id="debug-json-view" readonly></textarea>
+        <div class="debug-btn-row">
+          <button class="debug-btn" id="debug-json-refresh">表示を更新</button>
+          <button class="debug-btn" id="debug-json-copy">クリップボードにコピー</button>
+        </div>
+        <button class="debug-btn debug-btn-danger" id="debug-full-reset">全セーブデータを完全リセット</button>
+      </section>
+
+    </main>
+
+    <footer class="lobby-footer">
+      <p>♠ ♥ ♣ ♦ &nbsp; Card Games Collection — Debug &nbsp; ♠ ♥ ♣ ♦</p>
+    </footer>
+  </div>
+
+  <script src="js/cards.js"></script>
+  <script src="js/save.js"></script>
+  <script src="debug.js"></script>
+</body>
+</html>
