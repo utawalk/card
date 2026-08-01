@@ -91,42 +91,6 @@
   margin-top: 3px;
 }
 
-/* スーツジャンプナビ */
-.deck-suit-nav {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.deck-suit-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  font-size: 18px;
-  text-decoration: none;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  transition: transform 0.25s var(--ease-spring), background 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
-
-.deck-suit-btn.spade   { color: var(--spade); }
-.deck-suit-btn.heart   { color: var(--heart); }
-.deck-suit-btn.club    { color: var(--club); }
-.deck-suit-btn.diamond { color: var(--diamond); }
-
-.deck-suit-btn:hover {
-  transform: translateY(-3px) scale(1.12);
-  background: rgba(255,255,255,0.1);
-}
-
-.deck-suit-btn.spade:hover   { box-shadow: 0 6px 16px rgba(167,139,250,0.4); border-color: rgba(167,139,250,0.4); }
-.deck-suit-btn.heart:hover   { box-shadow: 0 6px 16px rgba(248,113,113,0.4); border-color: rgba(248,113,113,0.4); }
-.deck-suit-btn.club:hover    { box-shadow: 0 6px 16px rgba( 52,211,153,0.4); border-color: rgba( 52,211,153,0.4); }
-.deck-suit-btn.diamond:hover { box-shadow: 0 6px 16px rgba(251,191, 36,0.4); border-color: rgba(251,191, 36,0.4); }
-
 /* ガチャへのショートカットボタン */
 .deck-gacha-btn {
   display: inline-flex;
@@ -264,6 +228,22 @@
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.08);
   text-align: center;
+}
+
+/* スート合計タイルはページ内の該当セクションへのリンクになっている */
+.deck-power-tile-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-spring),
+              border-color 0.25s ease,
+              background 0.25s ease;
+}
+
+.deck-power-tile-link:hover {
+  transform: translateY(-4px) scale(1.03);
+  border-color: var(--suit-color, var(--gold));
+  background: rgba(255,255,255,0.06);
 }
 
 .deck-power-tile-symbol {
@@ -779,10 +759,6 @@
     gap: 10px;
   }
 
-  .deck-suit-nav {
-    order: -1;
-  }
-
   /* モバイルでは矢印ナビを内側に */
   .deck-modal-prev { left: 8px; top: auto; bottom: 72px; transform: none; }
   .deck-modal-next { right: 8px; top: auto; bottom: 72px; transform: none; }
@@ -807,11 +783,5 @@
 
   .deck-page-title {
     font-size: 15px;
-  }
-
-  .deck-suit-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
   }
 }

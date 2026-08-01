@@ -100,9 +100,12 @@ function renderPowerSummary() {
   container.innerHTML = '';
 
   suitTotals.forEach(({ suit, total }) => {
-    const tile = document.createElement('div');
-    tile.className = 'deck-power-tile';
+    // クリックでページ内の該当スートのセクションへジャンプする
+    const tile = document.createElement('a');
+    tile.href = `#suit-${suit.key}`;
+    tile.className = 'deck-power-tile deck-power-tile-link';
     tile.style.setProperty('--suit-color', suit.color);
+    tile.title = `${suit.name} へジャンプ`;
     tile.innerHTML = `
       <span class="deck-power-tile-symbol">${suit.symbol}</span>
       <span class="deck-power-tile-label">${suit.name}</span>
