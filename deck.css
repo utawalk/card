@@ -471,7 +471,15 @@
 
 .deck-card-power-num {
   font-family: 'Cinzel', serif;
+  /* パワーの数字はスートごとに色を変えず、全スート共通の色にする（アイコンはスート色のまま） */
+  color: var(--gold, #d4af37);
 }
+
+/* 得点加算演出（ソリティア）と同じ色分け（js/cards.js の getScoreColorTierClass()）
+   +10以上: オレンジ赤 / +20以上: ピンク / +30以上: 紫（現状の仕様では出現しない） */
+.deck-card-power-num.score-color-tier1 { color: #ff5a3c; }
+.deck-card-power-num.score-color-tier2 { color: #ff2d95; }
+.deck-card-power-num.score-color-tier3 { color: #b026ff; }
 
 .deck-card-item:hover .deck-card-power {
   background: rgba(0,0,0,0.7);

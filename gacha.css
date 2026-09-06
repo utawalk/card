@@ -231,6 +231,23 @@
   box-shadow: none;
 }
 
+.gacha-pull-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.gacha-pull-btn-10 {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  box-shadow: 0 10px 30px rgba(212,175,55,0.4);
+}
+
+.gacha-pull-btn-10:hover {
+  box-shadow: 0 14px 40px rgba(212,175,55,0.55);
+}
+
 .gacha-pull-cost {
   display: inline-flex;
   align-items: center;
@@ -610,6 +627,147 @@
 }
 
 /* ======================================================
+   10連結果オーバーレイ
+   ====================================================== */
+
+.gacha-result-overlay-10 {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(5, 8, 15, 0.75);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.gacha-result-overlay-10.hidden {
+  display: none;
+}
+
+.gacha-result-overlay-10.active {
+  opacity: 1;
+}
+
+.gacha-result-box-10 {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: min(640px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 30px 28px 26px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, var(--surface-2), var(--surface));
+  border: 1px solid var(--border-gold);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  transform: scale(0.4) translateY(40px);
+  opacity: 0;
+  transition: transform 0.55s var(--ease-spring), opacity 0.3s ease;
+}
+
+.gacha-result-overlay-10.active .gacha-result-box-10 {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.gacha-result-10-title {
+  position: relative;
+  z-index: 2;
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.gacha-result-10-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.gacha-result-10-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px 8px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  animation: gacha-result-10-cell-in 0.4s var(--ease-spring) both;
+}
+
+.gacha-result-10-cell.is-new {
+  border-color: rgba(212,175,55,0.5);
+  background: rgba(212,175,55,0.08);
+  box-shadow: 0 0 16px rgba(212,175,55,0.25);
+}
+
+@keyframes gacha-result-10-cell-in {
+  0%   { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+.gacha-result-10-img {
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
+}
+
+.gacha-result-10-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+
+.gacha-result-10-badge.new {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: #2a1d00;
+}
+
+.gacha-result-10-badge.dup {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-sub);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.gacha-result-10-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gacha-result-10-power {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #ffd76a;
+}
+
+.gacha-result-10-summary {
+  position: relative;
+  z-index: 2;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+  text-align: center;
+}
+
+/* ======================================================
    Responsive
    ====================================================== */
 
@@ -634,5 +792,17 @@
   .gacha-collection-grid {
     grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
     gap: 7px;
+  }
+  .gacha-pull-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gacha-result-box-10 {
+    padding: 22px 16px 20px;
+    gap: 12px;
+  }
+  .gacha-result-10-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 }

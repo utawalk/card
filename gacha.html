@@ -49,10 +49,16 @@
           </div>
         </div>
 
-        <button class="gacha-pull-btn" id="gacha-pull-btn">
-          <span class="gacha-pull-label">ガチャを引く</span>
-          <span class="gacha-pull-cost">🪙 <span id="gacha-cost-label">50</span></span>
-        </button>
+        <div class="gacha-pull-buttons">
+          <button class="gacha-pull-btn" id="gacha-pull-btn">
+            <span class="gacha-pull-label">ガチャを引く</span>
+            <span class="gacha-pull-cost">🪙 <span id="gacha-cost-label">50</span></span>
+          </button>
+          <button class="gacha-pull-btn gacha-pull-btn-10" id="gacha-pull-btn-10">
+            <span class="gacha-pull-label">10連ガチャ</span>
+            <span class="gacha-pull-cost">🪙 <span id="gacha-cost-label-10">500</span></span>
+          </button>
+        </div>
         <p class="gacha-insufficient hidden" id="gacha-insufficient">コインが足りません…</p>
       </section>
 
@@ -92,6 +98,19 @@
       <div class="gacha-result-power" id="gacha-result-power"></div>
       <p class="gacha-result-message" id="gacha-result-message"></p>
       <button class="gacha-result-close-btn" id="gacha-result-close-btn">閉じる</button>
+    </div>
+  </div>
+
+  <!-- 10連結果オーバーレイ -->
+  <div class="gacha-result-overlay-10 hidden" id="gacha-result-overlay-10" role="dialog" aria-modal="true" aria-label="10連ガチャ結果">
+    <div class="gacha-result-box-10" id="gacha-result-box-10">
+      <div class="gacha-confetti-layer" id="gacha-confetti-layer-10"></div>
+      <h2 class="gacha-result-10-title">10連ガチャ結果</h2>
+      <div class="gacha-result-10-grid" id="gacha-result-10-grid">
+        <!-- JS で動的生成 -->
+      </div>
+      <p class="gacha-result-10-summary" id="gacha-result-10-summary"></p>
+      <button class="gacha-result-close-btn" id="gacha-result-10-close-btn">閉じる</button>
     </div>
   </div>
 

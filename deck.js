@@ -310,7 +310,10 @@ function createCardItem({ suit, imgSrc, label, power, owned, rankIdx, isComplete
   if (power !== null && power !== undefined) {
     const pw = document.createElement('div');
     pw.className = 'deck-card-power';
-    pw.innerHTML = `<span class="deck-card-power-icon">⚡</span><span class="deck-card-power-num">${power}</span>`;
+    // 得点加算演出と同じ色分け（+10以上・+20以上・+30以上）を数字にも適用する
+    const scoreTierClass = (typeof getScoreColorTierClass === 'function') ? getScoreColorTierClass(power) : '';
+    const numClass = 'deck-card-power-num' + (scoreTierClass ? ' ' + scoreTierClass : '');
+    pw.innerHTML = `<span class="deck-card-power-icon">⚡</span><span class="${numClass}">${power}</span>`;
     pw.style.setProperty('--suit-color', suit.color);
     item.dataset.power = String(power);
     item.appendChild(pw);

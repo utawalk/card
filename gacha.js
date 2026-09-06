@@ -18,6 +18,7 @@ const GACHA_SUIT_INFO = {
 };
 
 const GACHA_COST             = 50; // 1回あたりの消費コイン
+const GACHA_COST_10          = GACHA_COST * 10; // 10連あたりの消費コイン
 const GACHA_DUPLICATE_REFUND = 25; // 重複だった場合の還元コイン
 
 let gachaBusy = false;
@@ -35,6 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('gacha-result-close-btn')?.addEventListener('click', closeResult);
   document.getElementById('gacha-result-overlay')?.addEventListener('click', (e) => {
     if (e.target.id === 'gacha-result-overlay') closeResult();
+  });
+
+  document.getElementById('gacha-pull-btn-10')?.addEventListener('click', handlePull10);
+  document.getElementById('gacha-result-10-close-btn')?.addEventListener('click', closeResult10);
+  document.getElementById('gacha-result-overlay-10')?.addEventListener('click', (e) => {
+    if (e.target.id === 'gacha-result-overlay-10') closeResult10();
   });
 });
 
@@ -173,6 +180,54 @@ function handlePull() {
   });
 }
 
+function handlePull10() {
+  if (gachaBusy) return;
+
+  if (typeof Wallet_spendCoins !== 'function' || typeof Collection_unlock !== 'function') {
+    console.warn('[Gacha] save.js が読み込まれていません');
+    return;
+  }
+
+  const spend = Wallet_spendCoins(GACHA_COST_10);
+  if (!spend.success) {
+    showInsufficientMessage();
+    return;
+  }
+
+  gachaBusy = true;
+  updateCoinDisplay();
+  playPullSound();
+
+  playGachaShakeAnimation(() => {
+    const results = [];
+    let newCount = 0;
+    let refundTotal = 0;
+
+    for (let i = 0; i < 10; i++) {
+      const suit = GACHA_SUITS[Math.floor(Math.random() * GACHA_SUITS.length)];
+      const rank = GACHA_RANKS[Math.floor(Math.random() * GACHA_RANKS.length)];
+      const { alreadyOwned } = Collection_unlock(suit, rank);
+
+      let refunded = 0;
+      if (alreadyOwned) {
+        Wallet_addCoins(GACHA_DUPLICATE_REFUND);
+        refunded = GACHA_DUPLICATE_REFUND;
+      } else {
+        newCount++;
+      }
+      refundTotal += refunded;
+
+      results.push({ suit, rank, alreadyOwned });
+    }
+
+    updateCoinDisplay();
+    showResult10(results, newCount, refundTotal);
+    renderCollectionGrid();
+
+    gachaBusy = false;
+  });
+}
+
 function showInsufficientMessage() {
   const el = document.getElementById('gacha-insufficient');
   if (!el) return;
@@ -274,8 +329,8 @@ function spawnGachaParticles(cx, cy) {
 
 const GACHA_CONFETTI_COLORS = ['#f5d060', '#d4af37', '#a78bfa', '#f87171', '#34d399', '#fbbf24', '#ffffff'];
 
-function spawnConfetti() {
-  const container = document.getElementById('gacha-confetti-layer');
+function spawnConfetti(containerId) {
+  const container = document.getElementById(containerId || 'gacha-confetti-layer');
   if (!container) return;
   container.innerHTML = '';
 
@@ -360,6 +415,72 @@ function closeResult() {
   setTimeout(() => overlay.classList.add('hidden'), 250);
 
   stopGachaResultBgm(); // ウィンドウを閉じたらBGMを止める
+}
+
+// ============================================================
+//  10連結果表示
+// ============================================================
+
+function showResult10(results, newCount, refundTotal) {
+  const overlay = document.getElementById('gacha-result-overlay-10');
+  const grid    = document.getElementById('gacha-result-10-grid');
+  const summary = document.getElementById('gacha-result-10-summary');
+  if (!overlay || !grid || !summary) return;
+
+  grid.innerHTML = '';
+
+  results.forEach(({ suit, rank, alreadyOwned }) => {
+    const info  = GACHA_SUIT_INFO[suit];
+    const power = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(suit, rank) : '';
+
+    const cell = document.createElement('div');
+    cell.className = 'gacha-result-10-cell' + (alreadyOwned ? '' : ' is-new');
+
+    const img = document.createElement('img');
+    img.className = 'gacha-result-10-img';
+    img.src = (typeof getCardImagePath === 'function') ? getCardImagePath(suit, rank) : `images/cards/${suit}/A001_card/${rank}.png`;
+    img.alt = `${info.name} ${rank}`;
+    cell.appendChild(img);
+
+    const badge = document.createElement('div');
+    badge.className = 'gacha-result-10-badge' + (alreadyOwned ? ' dup' : ' new');
+    badge.textContent = alreadyOwned ? '重複' : 'NEW';
+    cell.appendChild(badge);
+
+    const label = document.createElement('div');
+    label.className = 'gacha-result-10-label';
+    label.textContent = `${info.symbol}${rank}`;
+    label.style.color = info.color;
+    cell.appendChild(label);
+
+    const powerEl = document.createElement('div');
+    powerEl.className = 'gacha-result-10-power';
+    powerEl.textContent = `⚡${power}`;
+    cell.appendChild(powerEl);
+
+    grid.appendChild(cell);
+  });
+
+  let summaryText = `NEW ${newCount}枚`;
+  if (refundTotal > 0) summaryText += ` ／ 重複還元コイン +${refundTotal}`;
+  summary.textContent = summaryText;
+
+  if (newCount > 0) {
+    playNewCardFanfare();
+    spawnConfetti('gacha-confetti-layer-10');
+  } else {
+    playDuplicateSound();
+  }
+
+  overlay.classList.remove('hidden');
+  requestAnimationFrame(() => overlay.classList.add('active'));
+}
+
+function closeResult10() {
+  const overlay = document.getElementById('gacha-result-overlay-10');
+  if (!overlay) return;
+  overlay.classList.remove('active');
+  setTimeout(() => overlay.classList.add('hidden'), 250);
 }
 
 // ============================================================
