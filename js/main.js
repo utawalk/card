@@ -44,7 +44,7 @@ function playSound(type) {
   const gainNode = audioCtx.createGain();
   
   osc.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
+  gainNode.connect(Sound_getDestination(audioCtx));
   
   const now = audioCtx.currentTime;
   

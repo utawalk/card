@@ -61,7 +61,7 @@ function playTone(ctx, freq, startTime, duration, gainPeak, type = 'sine', pan =
 
   osc.connect(gain);
   gain.connect(panner);
-  panner.connect(ctx.destination);
+  panner.connect(Sound_getDestination(ctx));
 
   osc.start(startTime);
   osc.stop(startTime + duration + 0.05);
@@ -650,6 +650,7 @@ function getFoundationBgmAudio(suit) {
     audio.volume  = 0;
     audio.preload = 'auto';
     foundationBgmAudios[suit] = audio;
+    if (typeof Sound_registerBgmAudio === 'function') Sound_registerBgmAudio(audio);
   }
   return foundationBgmAudios[suit];
 }
