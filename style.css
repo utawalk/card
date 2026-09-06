@@ -911,6 +911,7 @@ h1 {
   :root {
     --card-width: 70px;
     --card-height: 98px;
+    --card-border-radius: 5px; /* スマホ向け: カード画像の左上ランク表記が欠けないよう角を小さく */
     --card-spacing-x: 10px;
     --card-spacing-y: 16px;
     --card-offset-y: 18px;
@@ -929,6 +930,7 @@ h1 {
   :root {
     --card-width: 46px;
     --card-height: 64px;
+    --card-border-radius: 3px; /* スマホ向け: カード画像の左上ランク表記が欠けないよう角を小さく */
     --card-spacing-x: 4px;
     --card-spacing-y: 8px;
     --card-offset-y: 14px;

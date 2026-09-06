@@ -853,7 +853,7 @@ function getAudioCtx() {
 function tone(ctx, freq, start, dur, gain, type = 'sine') {
   const osc = ctx.createOscillator();
   const g   = ctx.createGain();
-  osc.connect(g); g.connect(ctx.destination);
+  osc.connect(g); g.connect(Sound_getDestination(ctx));
   osc.type = type;
   osc.frequency.setValueAtTime(freq, start);
   g.gain.setValueAtTime(0, start);

@@ -272,6 +272,7 @@ function getSuitBgmAudio(suit) {
     audio.volume  = 0;
     audio.preload = 'auto';
     suitBgmAudios[suit] = audio;
+    if (typeof Sound_registerBgmAudio === 'function') Sound_registerBgmAudio(audio);
   }
   return suitBgmAudios[suit];
 }

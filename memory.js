@@ -16,10 +16,13 @@
 const ALL_SUITS = ['spades', 'hearts', 'clubs', 'diamonds'];
 const ALL_RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 
+// 5段階に細分化（一番簡単なものは8枚=2ランク×4スート）
 const DIFFICULTIES = {
-  easy:   { ranks: ALL_RANKS.slice(0, 4),  cols: 4,  label: 'EASY',   jpLabel: 'かんたん'  },
-  normal: { ranks: ALL_RANKS.slice(0, 8),  cols: 8,  label: 'NORMAL', jpLabel: 'ふつう'    },
-  hard:   { ranks: ALL_RANKS,              cols: 13, label: 'HARD',   jpLabel: 'むずかしい' },
+  easy:    { ranks: ALL_RANKS.slice(0, 2), cols: 4,  label: 'EASY',    jpLabel: 'かんたん'   },
+  light:   { ranks: ALL_RANKS.slice(0, 4), cols: 4,  label: 'LIGHT',   jpLabel: 'やさしい'   },
+  normal:  { ranks: ALL_RANKS.slice(0, 6), cols: 6,  label: 'NORMAL',  jpLabel: 'ふつう'     },
+  hard:    { ranks: ALL_RANKS.slice(0, 9), cols: 9,  label: 'HARD',    jpLabel: 'むずかしい' },
+  extreme: { ranks: ALL_RANKS,             cols: 13, label: 'EXTREME', jpLabel: 'おに'       },
 };
 
 const MEM_SAVE_KEY = 'card_games_save_v1';
@@ -114,6 +117,7 @@ function startGame(difficulty) {
     matchedCount:   0,           // ペア成立数
     totalPairs:     cardList.length / 2,  // 必要ペア数 = 全枚数 / 2
     moves:          0,
+    score:          0,           // カードのパワーに応じた得点
     timerMs:        0,
     timerStart:     null,
     locked:         false,       // 判定アニメーション中はロック
@@ -229,6 +233,16 @@ function onMatch(i1, i2) {
     G.cards[i1].matched = true;
     G.cards[i2].matched = true;
     G.matchedCount++;
+
+    // ---- ペア成立カードのパワーに応じて得点を加算 ----
+    const c1 = G.cards[i1];
+    const c2 = G.cards[i2];
+    const p1 = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(c1.suit, c1.rank) : 0;
+    const p2 = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(c2.suit, c2.rank) : 0;
+    G.score += p1 + p2;
+    spawnScorePopup(i1, p1);
+    spawnScorePopup(i2, p2);
+
     G.flippedIndices = [];
     G.locked = false;
     // matched クラスを付与 → 透明化
@@ -312,6 +326,21 @@ function renderStats() {
   if (el('timer-display'))  el('timer-display').textContent  = formatTime(G.timerMs);
   if (el('pairs-display'))  el('pairs-display').textContent  = `${G.matchedCount} / ${G.totalPairs}`;
   if (el('moves-display'))  el('moves-display').textContent  = String(G.moves);
+  if (el('score-display'))  el('score-display').textContent  = String(G.score);
+}
+
+/** ペア成立時、揃ったカードの上に「+パワー」のポップアップを表示する */
+function spawnScorePopup(index, power) {
+  if (!power) return;
+  const cardEl = getCardEl(index);
+  if (!cardEl) return;
+
+  const popup = document.createElement('span');
+  popup.className = 'memory-score-popup';
+  popup.textContent = `+${power}`;
+  cardEl.appendChild(popup);
+
+  setTimeout(() => popup.remove(), 1100);
 }
 
 // ============================================================
@@ -339,7 +368,7 @@ function buildDiffPreviews() {
 }
 
 function renderDifficultyRecords() {
-  ['easy', 'normal', 'hard'].forEach(diff => {
+  Object.keys(DIFFICULTIES).forEach(diff => {
     const rec = getRecord(diff);
     const te = document.getElementById(`best-time-${diff}`);
     const me = document.getElementById(`best-moves-${diff}`);
@@ -359,6 +388,8 @@ function showResult(elapsed, newBestTime, newBestMoves) {
   document.getElementById('result-diff-badge').textContent  = config.label;
   document.getElementById('result-time').textContent         = formatTime(elapsed);
   document.getElementById('result-moves').textContent        = `${G.moves} 手`;
+  const scoreEl = document.getElementById('result-score');
+  if (scoreEl) scoreEl.textContent = String(G.score);
 
   const tb = document.getElementById('result-time-badge');
   const mb = document.getElementById('result-moves-badge');
@@ -447,7 +478,7 @@ function playTone(ctx, freq, start, dur, gain, type = 'sine') {
   const osc = ctx.createOscillator();
   const g   = ctx.createGain();
   osc.connect(g);
-  g.connect(ctx.destination);
+  g.connect(Sound_getDestination(ctx));
   osc.type = type;
   osc.frequency.setValueAtTime(freq, start);
   g.gain.setValueAtTime(0, start);
@@ -466,7 +497,7 @@ function playSound(type) {
       // カードをめくる音（短い上昇音）
       const osc = ctx.createOscillator();
       const g   = ctx.createGain();
-      osc.connect(g); g.connect(ctx.destination);
+      osc.connect(g); g.connect(Sound_getDestination(ctx));
       osc.type = 'sine';
       osc.frequency.setValueAtTime(500, now);
       osc.frequency.exponentialRampToValueAtTime(850, now + 0.08);

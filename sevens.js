@@ -633,7 +633,7 @@ function playTone(ctx, freq, start, dur, gain, type = 'sine') {
   const osc = ctx.createOscillator();
   const g   = ctx.createGain();
   osc.connect(g);
-  g.connect(ctx.destination);
+  g.connect(Sound_getDestination(ctx));
   osc.type = type;
   osc.frequency.setValueAtTime(freq, start);
   g.gain.setValueAtTime(0, start);
@@ -652,7 +652,7 @@ function playSound(type) {
       // 短い上昇音
       const osc = ctx.createOscillator();
       const g   = ctx.createGain();
-      osc.connect(g); g.connect(ctx.destination);
+      osc.connect(g); g.connect(Sound_getDestination(ctx));
       osc.type = 'sine';
       osc.frequency.setValueAtTime(400, now);
       osc.frequency.exponentialRampToValueAtTime(700, now + 0.1);
@@ -668,7 +668,7 @@ function playSound(type) {
       // 下降する悲しい音
       const osc = ctx.createOscillator();
       const g   = ctx.createGain();
-      osc.connect(g); g.connect(ctx.destination);
+      osc.connect(g); g.connect(Sound_getDestination(ctx));
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(320, now);
       osc.frequency.exponentialRampToValueAtTime(80, now + 0.5);

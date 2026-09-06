@@ -41,6 +41,11 @@
           <span class="hstat-label">手数</span>
           <span class="hstat-value" id="moves-display">0</span>
         </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat">
+          <span class="hstat-label">⚡ スコア</span>
+          <span class="hstat-value" id="score-display">0</span>
+        </div>
       </div>
       <button id="quit-game-btn" class="memory-quit-btn hidden">やめる</button>
     </header>
@@ -55,8 +60,8 @@
           <div class="diff-icon">🌱</div>
           <div class="diff-name">EASY</div>
           <div class="diff-jp">かんたん</div>
-          <div class="diff-count"><strong>16</strong> 枚</div>
-          <div class="diff-detail">4スート × 4ランク</div>
+          <div class="diff-count"><strong>8</strong> 枚</div>
+          <div class="diff-detail">4スート × 2ランク</div>
           <div class="diff-preview" id="preview-easy"></div>
           <div class="diff-records">
             <div class="drec">
@@ -70,13 +75,33 @@
           </div>
         </button>
 
+        <!-- LIGHT -->
+        <button class="diff-card diff-light" data-diff="light">
+          <div class="diff-icon">🌿</div>
+          <div class="diff-name">LIGHT</div>
+          <div class="diff-jp">やさしい</div>
+          <div class="diff-count"><strong>16</strong> 枚</div>
+          <div class="diff-detail">4スート × 4ランク</div>
+          <div class="diff-preview" id="preview-light"></div>
+          <div class="diff-records">
+            <div class="drec">
+              <span class="drec-l">⏱ 最速</span>
+              <span class="drec-v" id="best-time-light">—</span>
+            </div>
+            <div class="drec">
+              <span class="drec-l">👆 最少手</span>
+              <span class="drec-v" id="best-moves-light">—</span>
+            </div>
+          </div>
+        </button>
+
         <!-- NORMAL -->
         <button class="diff-card diff-normal" data-diff="normal">
           <div class="diff-icon">⭐</div>
           <div class="diff-name">NORMAL</div>
           <div class="diff-jp">ふつう</div>
-          <div class="diff-count"><strong>32</strong> 枚</div>
-          <div class="diff-detail">4スート × 8ランク</div>
+          <div class="diff-count"><strong>24</strong> 枚</div>
+          <div class="diff-detail">4スート × 6ランク</div>
           <div class="diff-preview" id="preview-normal"></div>
           <div class="diff-records">
             <div class="drec">
@@ -95,8 +120,8 @@
           <div class="diff-icon">🔥</div>
           <div class="diff-name">HARD</div>
           <div class="diff-jp">むずかしい</div>
-          <div class="diff-count"><strong>52</strong> 枚</div>
-          <div class="diff-detail">4スート × 13ランク（全部）</div>
+          <div class="diff-count"><strong>36</strong> 枚</div>
+          <div class="diff-detail">4スート × 9ランク</div>
           <div class="diff-preview" id="preview-hard"></div>
           <div class="diff-records">
             <div class="drec">
@@ -106,6 +131,26 @@
             <div class="drec">
               <span class="drec-l">👆 最少手</span>
               <span class="drec-v" id="best-moves-hard">—</span>
+            </div>
+          </div>
+        </button>
+
+        <!-- EXTREME -->
+        <button class="diff-card diff-extreme" data-diff="extreme">
+          <div class="diff-icon">👹</div>
+          <div class="diff-name">EXTREME</div>
+          <div class="diff-jp">おに</div>
+          <div class="diff-count"><strong>52</strong> 枚</div>
+          <div class="diff-detail">4スート × 13ランク（全部）</div>
+          <div class="diff-preview" id="preview-extreme"></div>
+          <div class="diff-records">
+            <div class="drec">
+              <span class="drec-l">⏱ 最速</span>
+              <span class="drec-v" id="best-time-extreme">—</span>
+            </div>
+            <div class="drec">
+              <span class="drec-l">👆 最少手</span>
+              <span class="drec-v" id="best-moves-extreme">—</span>
             </div>
           </div>
         </button>
@@ -137,6 +182,11 @@
             <div class="rstat-value" id="result-moves">0 手</div>
             <div class="rstat-badge" id="result-moves-badge"></div>
           </div>
+          <div class="rstat-divider"></div>
+          <div class="rstat">
+            <div class="rstat-label">⚡ スコア</div>
+            <div class="rstat-value" id="result-score">0</div>
+          </div>
         </div>
 
         <div class="result-bests">
@@ -163,6 +213,7 @@
   </div>
   <script src="js/cards.js"></script>
   <script src="js/save.js"></script>
+  <script src="js/sound.js"></script>
   <script src="memory.js"></script>
 </body>
 </html>

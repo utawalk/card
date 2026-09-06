@@ -378,7 +378,7 @@ function gachaTone(ctx, freq, start, dur, gain, type = 'sine') {
   const osc = ctx.createOscillator();
   const g   = ctx.createGain();
   osc.connect(g);
-  g.connect(ctx.destination);
+  g.connect(Sound_getDestination(ctx));
   osc.type = type;
   osc.frequency.setValueAtTime(freq, start);
   g.gain.setValueAtTime(0, start);
@@ -396,7 +396,7 @@ function playPullSound() {
     const sweep = ctx.createOscillator();
     const sweepGain = ctx.createGain();
     sweep.connect(sweepGain);
-    sweepGain.connect(ctx.destination);
+    sweepGain.connect(Sound_getDestination(ctx));
     sweep.type = 'sawtooth';
     sweep.frequency.setValueAtTime(140, now);
     sweep.frequency.exponentialRampToValueAtTime(520, now + 0.6);
@@ -418,7 +418,7 @@ function playBurstImpact() {
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const g   = ctx.createGain();
-    osc.connect(g); g.connect(ctx.destination);
+    osc.connect(g); g.connect(Sound_getDestination(ctx));
     osc.type = 'sine';
     osc.frequency.setValueAtTime(180, now);
     osc.frequency.exponentialRampToValueAtTime(40, now + 0.25);
@@ -480,6 +480,7 @@ function getGachaBgmAudio(suit) {
     audio.volume  = 0;
     audio.preload = 'auto';
     gachaBgmAudios[suit] = audio;
+    if (typeof Sound_registerBgmAudio === 'function') Sound_registerBgmAudio(audio);
   }
   return gachaBgmAudios[suit];
 }
