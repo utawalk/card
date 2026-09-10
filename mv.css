@@ -1,0 +1,360 @@
+/* ======================================================
+   mv.css — スートMVページ
+   各スートのBGMに合わせて、カード素材(pitc)がズーム・パンして
+   ミュージックビデオ風に見えるフルスクリーン演出ページ。
+   ====================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --gold:       #d4af37;
+  --gold-light: #f5d060;
+  --bg:         #0d1117;
+  --text:       #f0f4ff;
+  --text-sub:   #8b98b8;
+
+  --spade:   #a78bfa;
+  --heart:   #f87171;
+  --club:    #34d399;
+  --diamond: #fbbf24;
+
+  --mv-accent: var(--gold);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+body.mv-suit-spades   { --mv-accent: var(--spade); }
+body.mv-suit-hearts   { --mv-accent: var(--heart); }
+body.mv-suit-clubs    { --mv-accent: var(--club); }
+body.mv-suit-diamonds { --mv-accent: var(--diamond); }
+
+/* ============================================================
+   ステージ（カードがズーム・パンして切り替わっていく領域）
+   ============================================================ */
+
+.mv-stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #05060a;
+  z-index: 1;
+}
+
+/* 白背景の素材を画面になじませるための、スートカラーのうっすらとしたトーン */
+.mv-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--mv-accent);
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.mv-card-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.mv-card-layer.mv-current {
+  opacity: 1;
+}
+
+.mv-card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  transform-origin: 50% 30%;
+  will-change: transform;
+  animation-duration: var(--mv-dur, 2600ms);
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* --- パン・ズームのバリエーション（通常カード用） --- */
+@keyframes mv-move-a {
+  0%   { transform: scale(1.12) translate(0, 0.5%); }
+  100% { transform: scale(1.0)  translate(0, -1.5%); }
+}
+@keyframes mv-move-b {
+  0%   { transform: scale(1.0)  translate(1.5%, 0.5%); }
+  100% { transform: scale(1.16) translate(-1.5%, -1.2%); }
+}
+@keyframes mv-move-c {
+  0%   { transform: scale(1.06) translate(-1.5%, 1%); }
+  100% { transform: scale(1.2)  translate(1.5%, -1.5%); }
+}
+@keyframes mv-move-d {
+  0%   { transform: scale(1.1)  translate(0, 1.5%); }
+  100% { transform: scale(1.22) translate(0, -2.2%); }
+}
+
+.mv-motion-a .mv-card-img { animation-name: mv-move-a; }
+.mv-motion-b .mv-card-img { animation-name: mv-move-b; }
+.mv-motion-c .mv-card-img { animation-name: mv-move-c; }
+.mv-motion-d .mv-card-img { animation-name: mv-move-d; }
+
+/* --- K・Q・J 専用：全身 → 顔まわりへぐっと寄っていく演出 --- */
+@keyframes mv-move-featured {
+  0%   { transform: scale(1.0)  translate(0, 5%); }
+  55%  { transform: scale(1.3)  translate(0, -3%); }
+  100% { transform: scale(1.55) translate(0, -7%); }
+}
+.mv-motion-featured .mv-card-img { animation-name: mv-move-featured; }
+
+/* --- フィナーレ（スート完成絵）：ゆっくり引いて全体を見せる --- */
+@keyframes mv-move-finale {
+  0%   { transform: scale(1.35) translate(0, -2%); }
+  100% { transform: scale(1.02) translate(0, 0.5%); }
+}
+.mv-motion-finale .mv-card-img { animation-name: mv-move-finale; }
+
+/* --- ランクバッジ（カードごとに左下へフェードイン） --- */
+.mv-rank-badge {
+  position: absolute;
+  left: 6%;
+  bottom: 9%;
+  z-index: 3;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: clamp(30px, 7vw, 60px);
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 28px var(--mv-accent);
+  letter-spacing: 2px;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s ease 0.2s, transform 0.7s ease 0.2s;
+}
+.mv-card-layer.mv-current .mv-rank-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mv-rank-badge-featured {
+  font-size: clamp(42px, 10vw, 92px);
+  color: var(--gold-light);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 20px var(--mv-accent), 0 0 46px rgba(212,175,55,0.55);
+}
+
+/* ============================================================
+   ビネット（周囲を少し暗くして素材を見やすくする）
+   ============================================================ */
+
+.mv-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 42%, transparent 36%, rgba(5,6,10,0.55) 76%, rgba(5,6,10,0.92) 100%),
+    linear-gradient(180deg, rgba(5,6,10,0.6) 0%, transparent 16%, transparent 80%, rgba(5,6,10,0.7) 100%);
+}
+
+/* ============================================================
+   ロビーへ戻るリンク
+   ============================================================ */
+
+.mv-back-btn {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: calc(14px + env(safe-area-inset-left, 0px));
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(13,17,23,0.55);
+  border: 1px solid rgba(255,255,255,0.16);
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.mv-back-btn:hover {
+  color: var(--gold-light);
+  border-color: rgba(212,175,55,0.45);
+}
+
+/* ============================================================
+   上部HUD（現在のスート表示）
+   ============================================================ */
+
+.mv-hud {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: rgba(13,17,23,0.55);
+  border: 1px solid rgba(212,175,55,0.28);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.mv-hud.mv-hud-visible { opacity: 1; }
+.mv-hud-symbol { font-size: 16px; color: var(--mv-accent); }
+.mv-hud-label {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+/* ============================================================
+   下部の進行ドット
+   ============================================================ */
+
+.mv-progress {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.mv-progress.mv-progress-visible { opacity: 1; }
+
+.mv-progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.mv-progress-dot.mv-progress-featured { width: 8px; height: 8px; }
+.mv-progress-dot.mv-progress-finale   { width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); }
+
+.mv-progress-dot.mv-progress-active {
+  background: var(--gold-light);
+  transform: scale(1.35);
+  box-shadow: 0 0 8px rgba(212,175,55,0.7);
+}
+.mv-progress-dot.mv-progress-finale.mv-progress-active {
+  transform: rotate(45deg) scale(1.35);
+}
+
+/* ============================================================
+   開始オーバーレイ
+   ============================================================ */
+
+.mv-start-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background: radial-gradient(circle at 50% 38%, rgba(30,37,53,0.94), rgba(5,6,10,0.98));
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.mv-start-overlay.mv-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mv-start-inner { max-width: 420px; }
+
+.mv-start-symbol {
+  font-size: 60px;
+  color: var(--mv-accent);
+  text-shadow: 0 0 34px var(--mv-accent);
+  margin-bottom: 10px;
+}
+
+.mv-start-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: 3px;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.mv-start-desc {
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--text-sub);
+  margin-bottom: 30px;
+}
+
+.mv-start-btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  color: #151a24;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  border: none;
+  border-radius: 999px;
+  padding: 14px 36px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(212,175,55,0.35);
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s ease;
+}
+.mv-start-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 36px rgba(212,175,55,0.5);
+}
+.mv-start-btn:active {
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   レスポンシブ（スマホ）
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .mv-back-btn { font-size: 11px; padding: 7px 12px; }
+  .mv-hud { padding: 6px 16px; }
+  .mv-hud-label { font-size: 11px; letter-spacing: 2px; }
+  .mv-start-symbol { font-size: 48px; }
+  .mv-start-title { font-size: 21px; }
+  .mv-start-desc { font-size: 12px; margin-bottom: 24px; }
+  .mv-start-btn { font-size: 14px; padding: 12px 30px; }
+}

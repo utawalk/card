@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Suit MV — Card Games</title>
+  <meta name="description" content="スートごとのカード素材をBGMに合わせてお見せするMV風ページ。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mv.css">
+</head>
+<body>
+
+  <!-- 背景いっぱいに広がるカード演出ステージ -->
+  <div id="mv-stage" class="mv-stage"></div>
+
+  <!-- 見やすくするための暗めのビネット -->
+  <div class="mv-vignette" aria-hidden="true"></div>
+
+  <!-- ロビーに戻るリンク -->
+  <a href="lobby.html" class="mv-back-btn" id="mv-back-btn" title="ロビーに戻る">← Lobby</a>
+
+  <!-- 上部：現在のスート表示 -->
+  <div class="mv-hud" id="mv-hud">
+    <span class="mv-hud-symbol" id="mv-suit-symbol">♠</span>
+    <span class="mv-hud-label" id="mv-suit-label">Spades</span>
+  </div>
+
+  <!-- 下部：進行状況ドット（A〜K + フィナーレ） -->
+  <div class="mv-progress" id="mv-progress" aria-hidden="true"></div>
+
+  <!-- 開始オーバーレイ（スマホの自動再生制限に配慮し、タップしてから再生を開始する） -->
+  <div class="mv-start-overlay" id="mv-start-overlay">
+    <div class="mv-start-inner">
+      <div class="mv-start-symbol" id="mv-start-symbol">♠</div>
+      <h1 class="mv-start-title" id="mv-start-title">Spades MV</h1>
+      <p class="mv-start-desc">
+        このスートのBGMに合わせて、カード素材をたっぷりお見せします。<br>
+        K・Q・J はとくにじっくりアップでご覧いただけます。
+      </p>
+      <button type="button" class="mv-start-btn" id="mv-start-btn">▶ MVを再生</button>
+    </div>
+  </div>
+
+  <script src="js/cards.js"></script>
+  <script src="js/save.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="mv.js"></script>
+</body>
+</html>

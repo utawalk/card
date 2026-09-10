@@ -188,9 +188,6 @@ html, body {
   overflow: hidden;
   background: rgba(212,175,55,0.04);
   border: 1px solid rgba(212,175,55,0.25);
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
   transition: transform 0.3s var(--ease-spring),
               box-shadow 0.3s ease,
               border-color 0.3s ease;
@@ -201,6 +198,46 @@ html, body {
   border-color: rgba(212,175,55,0.55);
   box-shadow: 0 16px 36px rgba(212,175,55,0.25);
   z-index: 2;
+}
+
+/* 画像+ラベル部分（デッキ画面への遷移リンク） */
+.lobby-deck-preview-link {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* 画像の下に追加した、そのスートのMVページへのリンク */
+.lobby-deck-preview-mv-link {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-sub);
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.lobby-deck-preview-mv-link:hover {
+  color: var(--gold-light);
+  background: rgba(212,175,55,0.16);
+}
+
+.mv-link-icon {
+  font-size: 12px;
 }
 
 .lobby-deck-preview-tile::before {
