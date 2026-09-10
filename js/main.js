@@ -502,8 +502,9 @@ function handleTouchStart(e) {
   // 自動で再描画されて少しずつレイアウトが動くため、そのタイミングによっては
   // 合成クリックが本来触れていないスーパーオートボタンなどに誤ってヒットし、
   // 「他の場所を触るとスーパーオートが切れる」という不具合につながっていた。
-  // ボタン等の本当にクリックさせたい要素の上では preventDefault しない。
-  if (!e.target.closest('button, a, input, select, textarea, label')) {
+  // ボタン等、および山札(#stock。空になるとカード要素が無くなり div 自体が
+  // タップ対象になる)など、本当にクリックさせたい要素の上では preventDefault しない。
+  if (!e.target.closest('button, a, input, select, textarea, label, #stock')) {
     e.preventDefault();
   }
 }
