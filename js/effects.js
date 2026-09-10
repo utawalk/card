@@ -308,7 +308,10 @@ function spawnScorePopup(cx, cy, power, theme) {
   if (!container) return;
 
   const text = document.createElement('div');
-  text.className = 'floating-text floating-text-score';
+  // 得点が高いほど目立つ色に切り替えて、大きな得点であることに気づいてもらいやすくする
+  // （+10以上・+20以上・+30以上の3段階。デッキ画面のパワー表示と共通の色分け定義を使う）
+  const scoreTierClass = (typeof getScoreColorTierClass === 'function') ? getScoreColorTierClass(power) : '';
+  text.className = 'floating-text floating-text-score' + (scoreTierClass ? ' ' + scoreTierClass : '');
   text.textContent = `+${power}`;
   text.style.left = `${cx}px`;
   text.style.top = `${cy}px`;

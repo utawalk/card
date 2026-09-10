@@ -150,6 +150,25 @@ function checkWinCondition() {
   return allFoundationsFull;
 }
 
+// ============================================================
+//  クリアボーナス（手数が少ないほど高い）
+//  moves が MOVE_BONUS_THRESHOLD 以上になると、ボーナスは0になる。
+//  そこまでの間は「手数が1増えるごとに MOVE_BONUS_PER_MOVE 点減る」形の
+//  シンプルな比例配分（値はプレイ感を見ながら今後調整しやすいよう定数化）。
+// ============================================================
+const MOVE_BONUS_THRESHOLD = 250; // これ以上のmoves数ならボーナス0
+const MOVE_BONUS_PER_MOVE  = 3;   // 手数1につき減るボーナス点
+
+/**
+ * クリア時の手数ボーナスを計算する
+ * @param {number} moves ゲームクリアまでの総手数
+ * @returns {number} 加算するボーナス得点（0以上の整数）
+ */
+function calculateMoveBonus(moves) {
+  const bonus = (MOVE_BONUS_THRESHOLD - moves) * MOVE_BONUS_PER_MOVE;
+  return Math.max(0, Math.round(bonus));
+}
+
 // Helper to check for Deadlock (no legal moves remain)
 function checkDeadlock() {
   // --- 1. Stock + Talon: 1枚引き形式なので全カードが順番にアクセス可能 ---

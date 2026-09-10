@@ -13,8 +13,11 @@
 //    "wallet": {
 //      "coins": number   // 全ゲーム共通のコイン所持数
 //    },
+//    "sevens": {
+//      "highScore":   number,  // 最高スコア
+//      "gamesPlayed": number   // プレイ回数
+//    },
 //    // 将来のゲームもここに追加
-//    "sevens":  { ... },
 //    "memory":  { ... },
 //  }
 // ============================================================
@@ -151,6 +154,48 @@ function Solitaire_onGameWin(score, moves) {
   const coinsTotal = Wallet_addCoins(coinsEarned);
 
   return { newHighScore, newBestMoves, coinsEarned, coinsTotal };
+}
+
+// ------------------------------------------------------------
+//  Sevens（七並べ）専用 API
+// ------------------------------------------------------------
+
+/** デフォルトの七並べ記録 */
+const SEVENS_DEFAULTS = {
+  highScore:   0,
+  gamesPlayed: 0,
+};
+
+/**
+ * 七並べの記録を取得する
+ * @returns {{highScore: number, gamesPlayed: number}}
+ */
+function Sevens_getRecord() {
+  return SaveData_get('sevens', SEVENS_DEFAULTS);
+}
+
+/**
+ * ゲーム開始時（配り直し含む一連のゲームが始まったとき）に呼ぶ（プレイ回数をインクリメント）
+ */
+function Sevens_onGameStart() {
+  const rec = Sevens_getRecord();
+  SaveData_patch('sevens', { gamesPlayed: rec.gamesPlayed + 1 });
+}
+
+/**
+ * ゲーム終了時（勝敗確定時）に呼ぶ。ハイスコアを自動更新する。
+ * @param {number} score  今回の最終スコア（順位ボーナス加算後）
+ * @returns {{ newHighScore: boolean, highScore: number }}
+ */
+function Sevens_onGameEnd(score) {
+  const rec = Sevens_getRecord();
+  const newHighScore = score > rec.highScore;
+
+  if (newHighScore) {
+    SaveData_patch('sevens', { highScore: score });
+  }
+
+  return { newHighScore, highScore: newHighScore ? score : rec.highScore };
 }
 
 // ------------------------------------------------------------

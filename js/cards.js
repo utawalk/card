@@ -62,6 +62,39 @@ function getEffectiveCardPower(suit, rank) {
 }
 
 // ============================================================
+//  得点の大きさに応じた色分け（段階）
+//  ソリティアの加点ポップアップ、デッキ画面のパワー数字など、
+//  「大きな得点ほど目立つ色にする」表示を全ゲーム共通で揃えるための定義。
+// ============================================================
+const SCORE_COLOR_TIER_THRESHOLDS = [
+  { tier: 3, min: 30 }, // 電光のような紫（現状のカード仕様では最大26のため未到達）
+  { tier: 2, min: 20 }, // 鮮やかなピンク
+  { tier: 1, min: 10 }, // オレンジ赤
+];
+
+/**
+ * 得点(パワー)の大きさに応じた色分け段階を返す
+ * @param {number} power
+ * @returns {number} 0(通常色) / 1 / 2 / 3
+ */
+function getScoreColorTier(power) {
+  for (const { tier, min } of SCORE_COLOR_TIER_THRESHOLDS) {
+    if (power >= min) return tier;
+  }
+  return 0;
+}
+
+/**
+ * getScoreColorTier() の結果からCSSクラス名を返す（0のときは空文字）
+ * @param {number} power
+ * @returns {string}
+ */
+function getScoreColorTierClass(power) {
+  const tier = getScoreColorTier(power);
+  return tier > 0 ? `score-color-tier${tier}` : '';
+}
+
+// ============================================================
 //  絵合わせ（ファウンデーション演出）用の素材パス
 //  A000_pitc = グレーカード用の絵素材 / A001_pitc = カラーカード用の絵素材
 //  そのカードが今デッキでグレーかカラーかに応じて、対応する絵素材を使う。

@@ -207,8 +207,22 @@ function renderTableau() {
   });
 }
 
+// スコア加算演出の直前値（初回描画では演出を出さないよう null で開始）
+let _lastDisplayedScoreForPop = null;
+
 function updateStats() {
-  document.getElementById('score-display').textContent = `Score: ${GameState.score}`;
+  const scoreEl = document.getElementById('score-display');
+  const newScore = GameState.score;
+  scoreEl.textContent = `Score: ${newScore}`;
+
+  // スコアが増えた瞬間だけ、目立つ演出（拡大＋色フラッシュ）を再生する
+  if (_lastDisplayedScoreForPop !== null && newScore > _lastDisplayedScoreForPop) {
+    scoreEl.classList.remove('score-gain');
+    void scoreEl.offsetWidth; // リフローを強制してアニメーションを再スタートさせる
+    scoreEl.classList.add('score-gain');
+  }
+  _lastDisplayedScoreForPop = newScore;
+
   document.getElementById('moves-display').textContent = `Moves: ${GameState.moves}`;
   updateCoinDisplay();
 }
@@ -224,11 +238,29 @@ function updateCoinDisplay() {
 function showVictory() {
   const overlay = document.getElementById('victory-overlay');
 
-  // 既に表示中なら再実行しない（コイン二重付与・効果音の多重再生を防止）
+  // 既に表示中なら再実行しない（コイン二重付与・効果音の多重再生を防止・ボーナス加算の二重防止）
   if (overlay && !overlay.classList.contains('hidden')) return;
 
-  document.getElementById('final-score').textContent = `Score: ${GameState.score}`;
+  // ---- 手数ボーナス（手数が少ないほど高い）を最終スコアに加算 ----
+  const baseScore = GameState.score; // ボーナスを足す前の「プレイ中に獲得したスコア」
+  const moveBonus = (typeof calculateMoveBonus === 'function') ? calculateMoveBonus(GameState.moves) : 0;
+  if (moveBonus > 0) GameState.score += moveBonus;
+  const totalScore = GameState.score; // ボーナス込みの最終合計スコア
+
+  // 「獲得スコア + 手数ボーナス = 最終合計スコア」の内訳を示しつつ、
+  // 主役である最終合計スコアの数字だけを大きく目立たせて表示する
+  const finalScoreEl = document.getElementById('final-score');
+  if (finalScoreEl) {
+    finalScoreEl.innerHTML = moveBonus > 0
+      ? `<span class="final-score-breakdown">獲得 ${baseScore} ＋ ボーナス ${moveBonus} ＝</span><span class="final-score-total">${totalScore}</span>`
+      : `<span class="final-score-total">${totalScore}</span>`;
+  }
   document.getElementById('final-moves').textContent = `Moves: ${GameState.moves}`;
+
+  const bonusEl = document.getElementById('victory-move-bonus');
+  if (bonusEl) {
+    bonusEl.textContent = moveBonus > 0 ? `⚡ 手数ボーナス: +${moveBonus}` : '';
+  }
 
   // ゲームクリア専用の長めのファンファーレ
   if (typeof playGameClearFanfare === 'function') playGameClearFanfare();

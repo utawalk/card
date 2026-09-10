@@ -17,6 +17,12 @@ let hintState = { active: false, cardId: null, timer: null };
 let autoFoundationEnabled = false;
 let autoFoundationTimer   = null;
 
+// スーパーオート（山札をめくる以外の手を全自動でおこなうモード）
+let superAutoEnabled = false;
+let superAutoTimer   = null;
+// true の間は「進展のない場札の入れ替え」を1回だけ許可済み（連続実行して無限ループするのを防ぐためのフラグ）
+let superAutoShuffleUsed = false;
+
 // State for custom Drag & Drop
 let dragState = {
   isDragging: false,
@@ -116,6 +122,16 @@ function initGame() {
     if (autoFoundationEnabled) runAutoFoundation();
   });
 
+  // スーパーオートボタン
+  document.getElementById('super-auto-btn').addEventListener('click', () => {
+    superAutoEnabled = !superAutoEnabled;
+    updateSuperAutoBtn();
+    if (superAutoEnabled) {
+      superAutoShuffleUsed = false;
+      runSuperAuto();
+    }
+  });
+
   // Setup Mouse Drag & Drop events
   const board = document.getElementById('board');
   board.addEventListener('mousedown', handleMouseDown);
@@ -139,6 +155,7 @@ function startNewGame() {
   clearHint();
   clearTimeout(deadlockCheckTimer);
   clearTimeout(autoFoundationTimer);
+  clearTimeout(superAutoTimer);
   if (typeof stopFoundationBgm === 'function') stopFoundationBgm(); // 新しいゲームではファウンデーションBGMをリセット
   if (typeof resetSuitLayers === 'function') resetSuitLayers();
   dealGame();
@@ -146,6 +163,7 @@ function startNewGame() {
   // ゲーム開始を記録（プレイ回数インクリメント）
   if (typeof Solitaire_onGameStart === 'function') Solitaire_onGameStart();
   if (autoFoundationEnabled) scheduleAutoFoundation();
+  if (superAutoEnabled) scheduleSuperAuto();
 }
 
 function handleStockClick(e) {
@@ -155,6 +173,7 @@ function handleStockClick(e) {
   renderBoard();
   scheduleDeadlockCheck();
   scheduleAutoFoundation();
+  scheduleSuperAuto();
 }
 
 // --- Interaction Logic (Find Card in State) ---
@@ -339,6 +358,7 @@ function endDrag(e) {
     } else {
       scheduleDeadlockCheck();
       scheduleAutoFoundation();
+      scheduleSuperAuto();
     }
   } else {
     // Play a lighter sound when snapping back
@@ -360,7 +380,7 @@ function endDrag(e) {
 function moveCardsToTableau(targetColIdx) {
   const cards = removeCardsFromOrigin();
   GameState.tableau[targetColIdx].push(...cards);
-  GameState.score += 5; // Reward
+  // 場札同士の入れ替えだけでは得点を加算しない（組札に置いたときだけ加点する）
 }
 
 // Remove dragged card from origin and push to foundation
@@ -471,8 +491,20 @@ function handleTouchStart(e) {
     if (target.classList.contains('face-down')) return;
 
     // Only prevent default on cards to allow clicking buttons
-    e.preventDefault(); 
+    e.preventDefault();
     startDrag(e, target);
+    return;
+  }
+
+  // カードでもボタン等でもない場所（盤面の空きスペースなど）をタップした場合。
+  // ここで preventDefault しないと、スマホのブラウザは触れた場所に対して
+  // 少し遅れて「合成クリック」を発生させる。スーパーオート中は盤面が
+  // 自動で再描画されて少しずつレイアウトが動くため、そのタイミングによっては
+  // 合成クリックが本来触れていないスーパーオートボタンなどに誤ってヒットし、
+  // 「他の場所を触るとスーパーオートが切れる」という不具合につながっていた。
+  // ボタン等の本当にクリックさせたい要素の上では preventDefault しない。
+  if (!e.target.closest('button, a, input, select, textarea, label')) {
+    e.preventDefault();
   }
 }
 
@@ -533,6 +565,7 @@ function handleCardClick(targetEl) {
     } else {
       scheduleDeadlockCheck();
       scheduleAutoFoundation();
+      scheduleSuperAuto();
     }
     renderBoard();
   }
@@ -578,6 +611,7 @@ function autoMoveToFoundation(cardId) {
   } else {
     scheduleDeadlockCheck();
     scheduleAutoFoundation();
+    scheduleSuperAuto();
   }
   renderBoard();
 }
@@ -685,8 +719,251 @@ function runAutoFoundation() {
 
   scheduleDeadlockCheck();
 
-  // 次のカードがあれば連鎖する（150ms環境でカードが流れる演出）
-  autoFoundationTimer = setTimeout(() => runAutoFoundation(), 150);
+  // 次のカードがあれば連鎖する（得点が入ったことがしっかり見えるよう、やや間隔をあけて流れる演出）
+  autoFoundationTimer = setTimeout(() => runAutoFoundation(), 320);
+}
+
+
+// ============================================================
+//  スーパーオート（山札をめくる操作以外は全自動）
+//
+//  優先順位:
+//   1. 組札(Foundation)へ置けるカード（山札めくり札 / 場札の一番上）
+//   2. 場札→場札の移動で、裏向きカードがめくれる（進展のある手、Kは除く）
+//   3. めくり札(Talon)→場札への移動（Kは除く）
+//   4. Kを空いている場所へ移動する手（他に手がある間は後回しにする）
+//   5. 場札の入れ替えのみで進展のない手（Kの移動は含まない。連続実行は1回まで）
+//  上記に当てはまらない手（山札をめくる操作など）は自動化せず、プレイヤーの操作を待つ。
+//  ※ Kは空いている場所にしか置けないカードのため、他のカードを使った手を
+//    優先させたいという要望に合わせて、意図的に優先度4まで後回しにしている。
+// ============================================================
+
+function updateSuperAutoBtn() {
+  const btn = document.getElementById('super-auto-btn');
+  if (!btn) return;
+  if (superAutoEnabled) {
+    btn.textContent = '🚀 スーパーオート: ON';
+    btn.classList.add('auto-active');
+  } else {
+    btn.textContent = '🚀 スーパーオート';
+    btn.classList.remove('auto-active');
+  }
+}
+
+function scheduleSuperAuto() {
+  if (!superAutoEnabled) return;
+  superAutoShuffleUsed = false; // 新しい操作が起きたので入れ替えの許可枠をリセット
+  clearTimeout(superAutoTimer);
+  superAutoTimer = setTimeout(() => runSuperAuto(), 200);
+}
+
+/**
+ * 次に自動実行すべき手を1つ探す（山札をめくる/リサイクルする手は対象外）
+ * @returns {object|null}
+ */
+function findBestSuperAutoMove() {
+  // --- 優先度1: Talon top → Foundation ---
+  if (GameState.talon.length > 0) {
+    const t = GameState.talon[GameState.talon.length - 1];
+    if (canMoveToFoundation(t, t.suit)) {
+      return { type: 'talon-to-foundation' };
+    }
+  }
+
+  // --- 優先度1: Tableau top → Foundation ---
+  for (let col = 0; col < 7; col++) {
+    const column = GameState.tableau[col];
+    if (column.length === 0) continue;
+    const top = column[column.length - 1];
+    if (top.faceUp && canMoveToFoundation(top, top.suit)) {
+      return { type: 'tableau-to-foundation', col };
+    }
+  }
+
+  // --- 優先度2: Tableau → Tableau（裏向きカードがめくれる手のみ・Kは除く）---
+  // Kは空いている場所にしか置けない（=このあとの優先度4で扱う）ため、
+  // ここでは「Kを動かして空き場所に置く」以外の、他のカードを使った本当に進展のある手を優先する。
+  for (let col = 0; col < 7; col++) {
+    const column = GameState.tableau[col];
+    let faceUpStart = column.length;
+    for (let row = column.length - 1; row >= 0; row--) {
+      if (column[row].faceUp) faceUpStart = row; else break;
+    }
+    if (faceUpStart >= column.length) continue; // 表向きカードなし
+    if (faceUpStart === 0) continue; // 動かしても新しいカードはめくれない → 対象外
+
+    const head = column[faceUpStart];
+    if (head.value === 13) continue; // Kは優先度4で扱う
+
+    for (let tCol = 0; tCol < 7; tCol++) {
+      if (tCol === col) continue;
+      const targetTop = GameState.tableau[tCol].length > 0
+        ? GameState.tableau[tCol][GameState.tableau[tCol].length - 1] : null;
+      if (canMoveToTableau(head, targetTop)) {
+        return { type: 'tableau-to-tableau', fromCol: col, index: faceUpStart, toCol: tCol };
+      }
+    }
+  }
+
+  // --- 優先度3: Talon top → Tableau（Kは除く） ---
+  if (GameState.talon.length > 0) {
+    const t = GameState.talon[GameState.talon.length - 1];
+    if (t.value !== 13) {
+      for (let col = 0; col < 7; col++) {
+        const targetTop = GameState.tableau[col].length > 0
+          ? GameState.tableau[col][GameState.tableau[col].length - 1] : null;
+        if (canMoveToTableau(t, targetTop)) {
+          return { type: 'talon-to-tableau', toCol: col };
+        }
+      }
+    }
+  }
+
+  // --- 優先度4: Kを空いている場所へ移動する手（優先度を下げ、他に手がないときだけ実行） ---
+  // 4a: 場札のKを動かして裏向きカードをめくる手（進展はあるが、他の手を優先させたいので後回し）
+  for (let col = 0; col < 7; col++) {
+    const column = GameState.tableau[col];
+    let faceUpStart = column.length;
+    for (let row = column.length - 1; row >= 0; row--) {
+      if (column[row].faceUp) faceUpStart = row; else break;
+    }
+    if (faceUpStart >= column.length) continue;
+    if (faceUpStart === 0) continue; // 裏向きカードがめくれない = 進展なし → 優先度5(またはスキップ)へ
+
+    const head = column[faceUpStart];
+    if (head.value !== 13) continue; // Kのみ対象
+
+    for (let tCol = 0; tCol < 7; tCol++) {
+      if (tCol === col) continue;
+      const targetTop = GameState.tableau[tCol].length > 0
+        ? GameState.tableau[tCol][GameState.tableau[tCol].length - 1] : null;
+      if (canMoveToTableau(head, targetTop)) {
+        return { type: 'tableau-to-tableau', fromCol: col, index: faceUpStart, toCol: tCol };
+      }
+    }
+  }
+
+  // 4b: めくり札のKを空いている場所へ移動する手
+  if (GameState.talon.length > 0) {
+    const t = GameState.talon[GameState.talon.length - 1];
+    if (t.value === 13) {
+      for (let col = 0; col < 7; col++) {
+        const targetTop = GameState.tableau[col].length > 0
+          ? GameState.tableau[col][GameState.tableau[col].length - 1] : null;
+        if (canMoveToTableau(t, targetTop)) {
+          return { type: 'talon-to-tableau', toCol: col };
+        }
+      }
+    }
+  }
+
+  // --- 優先度5: 場札→場札（裏向きカードは増えないが、盤面を動かして次の手を作るための1手）---
+  // 「ヒント」はこの種の手も提案するため、スーパーオートも同じ手が見えているのに何もしない、
+  // という食い違いを避けたい。ただし同種の手を連続で行うと同じ2枚がずっと往復してしまう恐れが
+  // あるため、直前の手が既にこのタイプだった場合（superAutoShuffleUsed）は今回は見送り、
+  // 手詰まり判定とプレイヤー操作（ヒント/手動移動/山札クリック）に委ねる。
+  // また、Kを空き場所から別の空き場所へ動かすだけの手は何の進展もないため、ここでは対象外にする
+  // （ヒント機能も同じ理由でこの手は提案しない）。
+  if (!superAutoShuffleUsed) {
+    for (let col = 0; col < 7; col++) {
+      const column = GameState.tableau[col];
+      let faceUpStart = column.length;
+      for (let row = column.length - 1; row >= 0; row--) {
+        if (column[row].faceUp) faceUpStart = row; else break;
+      }
+      if (faceUpStart >= column.length) continue; // 表向きカードなし
+      if (faceUpStart !== 0) continue; // 裏向きカードが残っている手は優先度2/4で既に判定済み
+
+      const head = column[faceUpStart];
+      if (head.value === 13) continue; // 空き場所→空き場所のK移動は無意味なので対象外
+
+      for (let tCol = 0; tCol < 7; tCol++) {
+        if (tCol === col) continue;
+        const targetTop = GameState.tableau[tCol].length > 0
+          ? GameState.tableau[tCol][GameState.tableau[tCol].length - 1] : null;
+        if (canMoveToTableau(head, targetTop)) {
+          return { type: 'tableau-to-tableau', fromCol: col, index: faceUpStart, toCol: tCol, nonReveal: true };
+        }
+      }
+    }
+  }
+
+  return null; // これ以上自動化できる手がない（山札を引く必要がある/手詰まり）
+}
+
+/** findBestSuperAutoMove() が返した手を実際に GameState へ適用する */
+function executeSuperAutoMove(move) {
+  if (move.type === 'talon-to-foundation') {
+    const card = GameState.talon.pop();
+    GameState.foundations[card.suit].push(card);
+    GameState.moves++;
+    const power = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(card.suit, card.rank) : 10;
+    GameState.score += power;
+    playSound('drop');
+    triggerFoundationEffect(card.suit, card.rank, SUITS.indexOf(card.suit));
+
+  } else if (move.type === 'tableau-to-foundation') {
+    const card = GameState.tableau[move.col].pop();
+    GameState.foundations[card.suit].push(card);
+    GameState.moves++;
+    const power = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(card.suit, card.rank) : 10;
+    GameState.score += power;
+    playSound('drop');
+    triggerFoundationEffect(card.suit, card.rank, SUITS.indexOf(card.suit));
+
+  } else if (move.type === 'tableau-to-tableau') {
+    const cards = GameState.tableau[move.fromCol].splice(move.index);
+    GameState.tableau[move.toCol].push(...cards);
+    GameState.moves++;
+    // 場札同士の入れ替えだけでは得点を加算しない（組札に置いたときだけ加点する）
+    playSound('drop');
+
+  } else if (move.type === 'talon-to-tableau') {
+    const card = GameState.talon.pop();
+    GameState.tableau[move.toCol].push(card);
+    GameState.moves++;
+    // めくり札を場札へ置いただけでは得点を加算しない（組札に置いたときだけ加点する）
+    playSound('drop');
+  }
+
+  autoFlipTableau();
+}
+
+/**
+ * スーパーオートのメインループ。
+ * 自動化できる手がなくなったら停止し、山札をめくる操作（または手詰まり判定）は
+ * プレイヤーに委ねる。
+ */
+function runSuperAuto() {
+  if (!superAutoEnabled) return;
+  if (checkWinCondition()) { showVictory(); return; }
+
+  const move = findBestSuperAutoMove();
+
+  if (!move) {
+    // これ以上の自動操作なし。本当に手詰まりであれば通知する。
+    if (!checkWinCondition() && checkDeadlock()) {
+      showDeadlock();
+    }
+    return;
+  }
+
+  // 進展のある手が実行できたら、入れ替えの許可枠を回復する。
+  // 「進展のない入れ替え」を使った直後は、次に本当に進展する手が出るまでフラグを立てたままにする。
+  superAutoShuffleUsed = !!move.nonReveal;
+
+  executeSuperAutoMove(move);
+  renderBoard();
+
+  if (checkWinCondition()) {
+    showVictory();
+    return;
+  }
+
+  scheduleDeadlockCheck();
+
+  // 次の自動操作があれば連鎖する（得点が入ったことがしっかり見えるよう、やや間隔をあけて流れる演出）
+  superAutoTimer = setTimeout(() => runSuperAuto(), 320);
 }
 
 
