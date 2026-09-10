@@ -55,8 +55,16 @@ body.mv-suit-diamonds { --mv-accent: var(--diamond); }
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #05060a;
   z-index: 1;
+  /* 背景いっぱいに、そのスートの「2」(壁紙のような素材)を敷く。
+     実際の画像URLはスートの所持状態(グレー/カラー)に応じてmv.jsが設定する。
+     カード素材(A・3〜K)は周囲が透明なPNGなので、この壁紙が透けて見える。
+     サイズ・位置は「2」がカードとして表示されるとき(.mv-card-img)と
+     揃えて、繰り返しではなく画面いっぱいに1枚だけ表示する。 */
+  background-color: #05060a;
+  background-repeat: no-repeat;
+  background-position: 50% 18%;
+  background-size: cover;
 }
 
 /* 白背景の素材を画面になじませるための、スートカラーのうっすらとしたトーン */
@@ -173,6 +181,58 @@ body.mv-suit-diamonds { --mv-accent: var(--diamond); }
   background:
     radial-gradient(ellipse at 50% 42%, transparent 36%, rgba(5,6,10,0.55) 76%, rgba(5,6,10,0.92) 100%),
     linear-gradient(180deg, rgba(5,6,10,0.6) 0%, transparent 16%, transparent 80%, rgba(5,6,10,0.7) 100%);
+}
+
+/* クラブだけ「かわいい雰囲気」にしたいとのご要望により、
+   四隅を暗くするのではなく、白くふんわり明るくするビネットにする */
+body.mv-suit-clubs .mv-vignette {
+  background:
+    radial-gradient(ellipse at 50% 42%, transparent 34%, rgba(255,255,255,0.55) 76%, rgba(255,255,255,0.93) 100%),
+    linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 16%, transparent 80%, rgba(255,255,255,0.65) 100%);
+}
+
+/* ============================================================
+   キラキラ紙吹雪（現状はダイヤのMVのみ。mv.jsが要素を生成する）
+   ============================================================ */
+
+.mv-confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mv-confetti-piece {
+  position: absolute;
+  top: 0;
+  left: var(--mv-c-left, 50%);
+  width: var(--mv-c-size, 8px);
+  height: var(--mv-c-size, 8px);
+  background: var(--mv-c-color, #fff2c2);
+  border-radius: var(--mv-c-radius, 2px);
+  opacity: 0;
+  box-shadow: 0 0 6px var(--mv-c-color, rgba(255,255,255,0.8)), 0 0 14px rgba(255,255,255,0.35);
+  animation: mv-confetti-fall var(--mv-c-dur, 7s) linear var(--mv-c-delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+
+.mv-confetti-piece.mv-confetti-star {
+  width: auto;
+  height: auto;
+  background: none;
+  box-shadow: none;
+  font-size: var(--mv-c-size, 14px);
+  line-height: 1;
+  color: var(--mv-c-color, #fff2c2);
+  text-shadow: 0 0 8px var(--mv-c-color, rgba(255,255,255,0.9)), 0 0 16px rgba(255,255,255,0.5);
+}
+
+@keyframes mv-confetti-fall {
+  0%   { transform: translate(0, -8vh) rotate(0deg);   opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 0.85; }
+  100% { transform: translate(var(--mv-c-drift, 30px), 108vh) rotate(var(--mv-c-rot, 360deg)); opacity: 0; }
 }
 
 /* ============================================================

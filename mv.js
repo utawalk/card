@@ -67,7 +67,9 @@ function initMv() {
   }
 
   applySuitTheme(meta);
+  applyWallpaper();
   buildProgressDots();
+  spawnConfetti();
 
   const startBtn = document.getElementById('mv-start-btn');
   if (startBtn) startBtn.addEventListener('click', startMv);
@@ -92,6 +94,66 @@ function applySuitTheme(meta) {
   if (labelEl)    labelEl.textContent  = meta.label;
   if (startSymEl) startSymEl.textContent = meta.symbol;
   if (startTitle) startTitle.textContent = `${meta.label} MV`;
+}
+
+/**
+ * MV中ずっと背景に敷く「壁紙」。
+ * 各スートの「2」の素材(pitc)は、キャラクターではなく壁紙のような
+ * 模様の絵になっているため、ステージの背景として敷き詰める。
+ * A・3〜Kのカード素材は周囲が透明なPNGなので、この壁紙が透けて見える。
+ * 所持状態(グレー/カラー)に応じた絵を、他のカードと同じ仕組みで自動選択する。
+ */
+function applyWallpaper() {
+  const stage = document.getElementById('mv-stage');
+  if (!stage) return;
+
+  const path = (typeof getCardPicturePath === 'function') ? getCardPicturePath(mvSuit, '2') : '';
+  if (path) stage.style.backgroundImage = `url("${path}")`;
+}
+
+// ============================================================
+//  キラキラ紙吹雪演出（現状はダイヤのMVのみ）
+// ============================================================
+
+// この配列にスート名を足せば、他のスートにも紙吹雪を追加できる
+const MV_CONFETTI_SUITS = ['diamonds'];
+
+const MV_CONFETTI_COLORS = ['#fff2c2', '#fbbf24', '#f5d060', '#ffffff'];
+const MV_CONFETTI_COUNT  = 46;
+
+function spawnConfetti() {
+  if (MV_CONFETTI_SUITS.indexOf(mvSuit) === -1) return;
+
+  const layer = document.getElementById('mv-confetti-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+
+  for (let i = 0; i < MV_CONFETTI_COUNT; i++) {
+    const isStar = Math.random() < 0.35;
+
+    const piece = document.createElement('span');
+    piece.className = 'mv-confetti-piece' + (isStar ? ' mv-confetti-star' : '');
+    if (isStar) piece.textContent = '✦';
+
+    const size  = isStar ? (10 + Math.random() * 12) : (5 + Math.random() * 7);   // px
+    const left  = Math.random() * 100;                                            // vw%
+    const dur   = 5 + Math.random() * 6;                                          // 5〜11s
+    const delay = -(Math.random() * dur);                                         // ランダムな位相から開始
+    const drift = (Math.random() - 0.5) * 140;                                    // 左右の揺れ(px)
+    const rot   = 180 + Math.random() * 540;                                      // 回転量(deg)
+    const color = MV_CONFETTI_COLORS[Math.floor(Math.random() * MV_CONFETTI_COLORS.length)];
+
+    piece.style.setProperty('--mv-c-size',  `${size}px`);
+    piece.style.setProperty('--mv-c-left',  `${left}%`);
+    piece.style.setProperty('--mv-c-dur',   `${dur}s`);
+    piece.style.setProperty('--mv-c-delay', `${delay}s`);
+    piece.style.setProperty('--mv-c-drift', `${drift}px`);
+    piece.style.setProperty('--mv-c-rot',   `${rot}deg`);
+    piece.style.setProperty('--mv-c-color', color);
+    if (!isStar) piece.style.setProperty('--mv-c-radius', Math.random() < 0.5 ? '50%' : '2px');
+
+    layer.appendChild(piece);
+  }
 }
 
 // ============================================================
