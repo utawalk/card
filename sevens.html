@@ -25,7 +25,12 @@
         <span class="coin-icon">🪙</span>
         <span class="coin-amount" id="coin-amount">0</span>
       </div>
+      <div class="score-badge" id="score-badge">
+        <span class="score-label">SCORE</span>
+        <span class="score-amount" id="score-amount">0</span>
+      </div>
       <div id="turn-indicator" class="turn-indicator" aria-live="polite"></div>
+      <button id="autoplay-btn" class="autoplay-btn">🤖 オートプレイ</button>
       <button id="new-game-btn" class="sevens-new-btn">New Game</button>
     </header>
 
@@ -103,6 +108,14 @@
 
     <!-- プレイヤーエリア -->
     <div id="player-area" class="player-area">
+      <!-- 配りなおし選択バー（ゲーム開始前のみ表示） -->
+      <div id="predeal-bar" class="predeal-bar hidden">
+        <span class="predeal-text">この手札で始めますか？</span>
+        <div class="predeal-actions">
+          <button id="redeal-btn" class="redeal-btn">🔄 配りなおす（残り<span id="redeal-count">3</span>回）</button>
+          <button id="start-game-btn" class="start-game-btn">▶ このカードでプレイ開始</button>
+        </div>
+      </div>
       <div class="player-info-bar">
         <div class="player-label">
           <span class="player-icon">👤</span>
@@ -123,6 +136,7 @@
         <h2 class="result-title" id="result-title">ゲーム終了</h2>
         <p class="result-sub" id="result-sub"></p>
         <div class="result-ranking" id="result-ranking"></div>
+        <div id="result-score" class="result-score"></div>
         <div id="result-coins" class="result-coins"></div>
         <button id="play-again-btn" class="play-again-btn">もう一度プレイ</button>
         <a href="lobby.html" class="result-lobby-link">ロビーへ戻る</a>
@@ -137,6 +151,9 @@
         <div id="suit-reveal-label"></div>
       </div>
     </div>
+
+    <!-- 加点ポップアップ用レイヤー -->
+    <div id="sevens-score-popup-layer"></div>
 
   </div>
 

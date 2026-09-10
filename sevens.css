@@ -136,6 +136,38 @@ body {
   transform: translateY(-1px);
 }
 
+/* オートプレイ ボタン（ONの間、自分のカードを自動で選んで出す） */
+.autoplay-btn {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-sub);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s, color 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+.autoplay-btn:hover {
+  background: rgba(255,255,255,0.09);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+.autoplay-btn.auto-active {
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 16px rgba(168,85,247,0.5);
+  animation: sevens-autoplay-glow 1.2s ease-in-out infinite;
+}
+@keyframes sevens-autoplay-glow {
+  0%, 100% { box-shadow: 0 4px 16px rgba(168,85,247,0.4); }
+  50%       { box-shadow: 0 4px 28px rgba(168,85,247,0.85); }
+}
+
 /* ======================================================
    Opponents
    ====================================================== */
@@ -403,6 +435,80 @@ body {
   margin-bottom: 10px;
 }
 
+.player-info-bar.hidden {
+  display: none;
+}
+
+/* 配りなおし選択バー（ゲーム開始前のみ表示） */
+.predeal-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: rgba(167,139,250,0.07);
+  border: 1px solid rgba(167,139,250,0.25);
+}
+
+.predeal-bar.hidden {
+  display: none;
+}
+
+.predeal-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+.predeal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.redeal-btn,
+.start-game-btn {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s, opacity 0.2s;
+  white-space: nowrap;
+}
+
+.redeal-btn {
+  border: 1px solid rgba(167,139,250,0.4);
+  background: rgba(167,139,250,0.12);
+  color: #c4b5fd;
+}
+.redeal-btn:hover:not(:disabled) {
+  background: rgba(167,139,250,0.22);
+  border-color: rgba(167,139,250,0.65);
+  transform: translateY(-1px);
+}
+.redeal-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.start-game-btn {
+  border: 1px solid rgba(52,211,153,0.45);
+  background: rgba(52,211,153,0.14);
+  color: #34d399;
+}
+.start-game-btn:hover {
+  background: rgba(52,211,153,0.26);
+  border-color: rgba(52,211,153,0.7);
+  transform: translateY(-1px);
+}
+
 .player-label {
   display: flex;
   align-items: center;
@@ -613,6 +719,14 @@ body {
 }
 
 /* ランキング */
+.result-score {
+  font-size: 15px;
+  font-weight: 700;
+  color: #c4b5fd;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(167,139,250,0.35);
+}
+
 .result-coins {
   font-size: 15px;
   font-weight: 700;
@@ -711,6 +825,22 @@ body {
   }
   .coin-badge .coin-icon { font-size: 12px; }
 
+  .score-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .score-badge .score-label { font-size: 9px; }
+
+  .autoplay-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+  .sevens-new-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
   .opponents-row {
     padding: 8px 10px;
     gap: 8px;
@@ -734,8 +864,85 @@ body {
   .player-area { padding: 8px 10px 12px; }
 
   .result-modal { padding: 28px 24px 24px; }
+
+  .predeal-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .redeal-btn,
+  .start-game-btn {
+    width: 100%;
+    text-align: center;
+  }
 }
 
+
+/* ============================================
+   加点ポップアップ（カードを場に置いたときのスコア表示）
+   ソリティア・デッキ画面と共通の「得点が高いほど目立つ色になる」
+   仕組み（js/cards.js の getScoreColorTierClass()）をここでも使う。
+   sevens.html は style.css / deck.css を読み込まないため、
+   色の値はここにも同じ値で複製している。
+   ============================================ */
+
+#sevens-score-popup-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 6500;
+  overflow: hidden;
+}
+
+.sevens-score-popup {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-family: 'Cinzel', serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffd76a;
+  white-space: nowrap;
+  text-shadow:
+    0 0 16px rgba(255, 215, 106, 0.9),
+    0 0 30px rgba(255, 215, 106, 0.55),
+    0 2px 4px rgba(0,0,0,0.85);
+  animation: sevens-score-float 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes sevens-score-float {
+  0%   { opacity: 0; transform: translate(-50%, -50%)  scale(0.5); }
+  15%  { opacity: 1; transform: translate(-50%, -90%)  scale(1.3); }
+  70%  { opacity: 1; transform: translate(-50%, -150%) scale(1);   }
+  100% { opacity: 0; transform: translate(-50%, -200%) scale(0.85);}
+}
+
+/* 得点の大きさに応じた文字色（+10以上/+20以上/+30以上の3段階。
+   style.css / deck.css と同じ値） */
+.score-color-tier1 { color: #ff5a3c; }
+.score-color-tier2 { color: #ff2d95; }
+.score-color-tier3 { color: #b026ff; }
+
+.sevens-score-popup.score-color-tier1 {
+  text-shadow:
+    0 0 18px rgba(255, 90, 60, 0.9),
+    0 0 34px rgba(255, 90, 60, 0.6),
+    0 2px 4px rgba(0,0,0,0.85);
+}
+.sevens-score-popup.score-color-tier2 {
+  text-shadow:
+    0 0 20px rgba(255, 45, 149, 0.9),
+    0 0 38px rgba(255, 45, 149, 0.65),
+    0 2px 4px rgba(0,0,0,0.85);
+}
+.sevens-score-popup.score-color-tier3 {
+  text-shadow:
+    0 0 22px rgba(176, 38, 255, 0.9),
+    0 0 42px rgba(176, 38, 255, 0.7),
+    0 2px 4px rgba(0,0,0,0.85);
+}
 
 /* ============================================
    スーツ絵完成演出オーバーレイ（ソリティアと共通の見た目）

@@ -513,6 +513,11 @@ html, body {
   opacity: 0.5;
 }
 
+/* 1つだけのスタッツ（例: ７ならべのハイスコアのみ）の場合は1列にする */
+.game-save-stats.single-stat {
+  grid-template-columns: 1fr;
+}
+
 .save-stat {
   display: flex;
   flex-direction: column;
@@ -546,7 +551,8 @@ html, body {
 }
 
 /* ハイスコアの値を少し大きく目立たせる */
-#stat-high-score {
+#stat-high-score,
+#stat-sevens-high-score {
   font-size: 16px;
   text-shadow: 0 0 10px rgba(212,175,55,0.4);
 }
@@ -624,6 +630,48 @@ html, body {
 .coin-badge .coin-icon {
   font-size: 15px;
   line-height: 1;
+}
+
+/* ======================================================
+   スコアバッジ（カードのパワーに応じて得点を獲得するゲーム用。
+   全ゲーム共通ヘッダー表示 — コインバッジと並べて使う）
+   ====================================================== */
+
+.score-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(167,139,250,0.10);
+  border: 1px solid rgba(167,139,250,0.35);
+  font-weight: 700;
+  font-size: 13px;
+  color: #c4b5fd;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.score-badge .score-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+
+.score-badge .score-amount {
+  font-family: 'Cinzel', serif;
+}
+
+.score-badge.score-gain {
+  animation: score-badge-gain-pop 0.5s ease-out;
+}
+
+@keyframes score-badge-gain-pop {
+  0%   { transform: scale(1);    box-shadow: none; }
+  30%  { transform: scale(1.18); box-shadow: 0 0 16px rgba(167,139,250,0.7); }
+  100% { transform: scale(1);    box-shadow: none; }
 }
 
 /* ======================================================

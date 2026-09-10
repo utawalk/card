@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   spawnAmbientSuits();
   initGameCardEffects();
   loadSaveStats();  // セーブデータをロビーに表示
+  loadSevensSaveStats(); // ７ならべのハイスコアをロビーに表示
   updateCoinDisplay();
   renderDeckPreview(); // 今のデッキの完成絵プレビュー（4スート）
   initSuitBgm();    // スートの絵にマウスオーバーでBGM再生
@@ -234,6 +235,28 @@ function loadSaveStats() {
 
   // クリア回数 / プレイ回数
   elWins.textContent = `${rec.gamesWon} / ${rec.gamesPlayed}`;
+}
+
+/** ロビーの７ならべカードに、現在のハイスコアを表示する */
+function loadSevensSaveStats() {
+  // save.js が読み込まれていない場合はスキップ
+  if (typeof Sevens_getRecord !== 'function') return;
+
+  const rec = Sevens_getRecord();
+
+  const elHighScore = document.getElementById('stat-sevens-high-score');
+  const statsBlock  = document.getElementById('sevens-save-stats');
+  if (!elHighScore) return;
+
+  if (rec.gamesPlayed === 0 || rec.highScore <= 0) {
+    // 未プレイ、またはまだ記録がない場合
+    elHighScore.textContent = '—';
+    if (statsBlock) statsBlock.classList.add('no-data');
+    return;
+  }
+
+  if (statsBlock) statsBlock.classList.remove('no-data');
+  elHighScore.textContent = rec.highScore.toLocaleString();
 }
 
 

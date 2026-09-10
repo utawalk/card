@@ -217,7 +217,8 @@ function handlePull10() {
       }
       refundTotal += refunded;
 
-      results.push({ suit, rank, alreadyOwned });
+      const power = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(suit, rank) : 0;
+      results.push({ suit, rank, alreadyOwned, power });
     }
 
     updateCoinDisplay();
@@ -429,9 +430,8 @@ function showResult10(results, newCount, refundTotal) {
 
   grid.innerHTML = '';
 
-  results.forEach(({ suit, rank, alreadyOwned }) => {
-    const info  = GACHA_SUIT_INFO[suit];
-    const power = (typeof getEffectiveCardPower === 'function') ? getEffectiveCardPower(suit, rank) : '';
+  results.forEach(({ suit, rank, alreadyOwned, power }) => {
+    const info = GACHA_SUIT_INFO[suit];
 
     const cell = document.createElement('div');
     cell.className = 'gacha-result-10-cell' + (alreadyOwned ? '' : ' is-new');
@@ -474,6 +474,10 @@ function showResult10(results, newCount, refundTotal) {
 
   overlay.classList.remove('hidden');
   requestAnimationFrame(() => overlay.classList.add('active'));
+
+  // 結果10枚の中で一番パワーが高いカードのスートのBGMを流す
+  const topCard = results.reduce((best, r) => (r.power > best.power ? r : best), results[0]);
+  if (topCard) playGachaResultBgm(topCard.suit);
 }
 
 function closeResult10() {
@@ -481,6 +485,8 @@ function closeResult10() {
   if (!overlay) return;
   overlay.classList.remove('active');
   setTimeout(() => overlay.classList.add('hidden'), 250);
+
+  stopGachaResultBgm(); // ウィンドウを閉じたらBGMを止める
 }
 
 // ============================================================
