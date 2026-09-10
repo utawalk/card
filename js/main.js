@@ -496,15 +496,24 @@ function handleTouchStart(e) {
     return;
   }
 
-  // カードでもボタン等でもない場所（盤面の空きスペースなど）をタップした場合。
+  // 山札(#stock)が空のときは中にカードが無く、タップ対象は #stock の div 自体になる。
+  // <button> と違い <div> はスマホのブラウザが合成クリックを確実に発火させない場合があるため、
+  // ネイティブのclickイベントに頼らず、ここで直接めくる/リサイクルする処理を呼び出す。
+  const stockEl = e.target.closest('#stock');
+  if (stockEl) {
+    e.preventDefault();
+    handleStockClick(e);
+    return;
+  }
+
+  // カードでも#stockでもボタン等でもない場所（盤面の空きスペースなど）をタップした場合。
   // ここで preventDefault しないと、スマホのブラウザは触れた場所に対して
   // 少し遅れて「合成クリック」を発生させる。スーパーオート中は盤面が
   // 自動で再描画されて少しずつレイアウトが動くため、そのタイミングによっては
   // 合成クリックが本来触れていないスーパーオートボタンなどに誤ってヒットし、
   // 「他の場所を触るとスーパーオートが切れる」という不具合につながっていた。
-  // ボタン等、および山札(#stock。空になるとカード要素が無くなり div 自体が
-  // タップ対象になる)など、本当にクリックさせたい要素の上では preventDefault しない。
-  if (!e.target.closest('button, a, input, select, textarea, label, #stock')) {
+  // ボタン等、本当にクリックさせたい要素の上では preventDefault しない。
+  if (!e.target.closest('button, a, input, select, textarea, label')) {
     e.preventDefault();
   }
 }
