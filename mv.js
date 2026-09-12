@@ -70,6 +70,9 @@ function initMv() {
   applyWallpaper();
   buildProgressDots();
   spawnConfetti();
+  spawnRisers();
+  spawnFeathers();
+  spawnPetals();
 
   const startBtn = document.getElementById('mv-start-btn');
   if (startBtn) startBtn.addEventListener('click', startMv);
@@ -151,6 +154,144 @@ function spawnConfetti() {
     piece.style.setProperty('--mv-c-rot',   `${rot}deg`);
     piece.style.setProperty('--mv-c-color', color);
     if (!isStar) piece.style.setProperty('--mv-c-radius', Math.random() < 0.5 ? '50%' : '2px');
+
+    layer.appendChild(piece);
+  }
+}
+
+// ============================================================
+//  ハート＋星が下から上に上がっていく演出（現状はハートのMVのみ）
+// ============================================================
+
+// この配列にスート名を足せば、他のスートにも同じ演出を追加できる
+const MV_RISER_SUITS = ['hearts'];
+
+const MV_RISER_HEART_COLORS = ['var(--mv-accent)', '#ffb3c6', '#ff8fab'];
+const MV_RISER_STAR_COLORS  = ['#fff2c2', '#ffffff', '#ffd6e0'];
+const MV_RISER_COUNT        = 34;
+
+function spawnRisers() {
+  if (MV_RISER_SUITS.indexOf(mvSuit) === -1) return;
+
+  const layer = document.getElementById('mv-riser-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+
+  for (let i = 0; i < MV_RISER_COUNT; i++) {
+    const isHeart = Math.random() < 0.55;
+
+    const piece = document.createElement('span');
+    piece.className = 'mv-riser-piece ' + (isHeart ? 'mv-riser-heart' : 'mv-riser-star');
+    piece.textContent = isHeart ? '♥' : '★';
+
+    const size    = isHeart ? (18 + Math.random() * 18) : (10 + Math.random() * 14);    // px
+    const left    = Math.random() * 100;                                                 // vw%
+    const dur     = isHeart ? (7 + Math.random() * 6) : (5 + Math.random() * 5);         // ハートはゆっくり、星は少し速め（ご要望で全体的に高速化）
+    const delay   = -(Math.random() * dur);                                              // ランダムな位相から開始(開始直後から画面に散らばった状態にする)
+    const drift   = (Math.random() - 0.5) * 90;                                          // 左右のふわふわ揺れ(px)
+    const rot     = (Math.random() - 0.5) * (isHeart ? 24 : 200);                        // ハートはわずかに傾く程度、星はくるくる回る
+    const opacity = isHeart ? (0.55 + Math.random() * 0.35) : (0.75 + Math.random() * 0.25);
+    const colors  = isHeart ? MV_RISER_HEART_COLORS : MV_RISER_STAR_COLORS;
+    const color   = colors[Math.floor(Math.random() * colors.length)];
+
+    piece.style.setProperty('--mv-r-size',    `${size}px`);
+    piece.style.setProperty('--mv-r-left',    `${left}%`);
+    piece.style.setProperty('--mv-r-dur',     `${dur}s`);
+    piece.style.setProperty('--mv-r-delay',   `${delay}s`);
+    piece.style.setProperty('--mv-r-drift',   `${drift}px`);
+    piece.style.setProperty('--mv-r-rot',     `${rot}deg`);
+    piece.style.setProperty('--mv-r-opacity', opacity);
+    piece.style.setProperty('--mv-r-color',   color);
+
+    layer.appendChild(piece);
+  }
+}
+
+// ============================================================
+//  鳥の羽毛が舞い落ちる演出（現状はスペードのMVのみ）
+// ============================================================
+
+// この配列にスート名を足せば、他のスートにも同じ演出を追加できる
+const MV_FEATHER_SUITS = ['spades'];
+
+const MV_FEATHER_COUNT = 18; // ご要望で数を減らした（元は30）
+
+function spawnFeathers() {
+  if (MV_FEATHER_SUITS.indexOf(mvSuit) === -1) return;
+
+  const layer = document.getElementById('mv-feather-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+
+  for (let i = 0; i < MV_FEATHER_COUNT; i++) {
+    const piece = document.createElement('span');
+    piece.className = 'mv-feather-piece';
+    piece.textContent = '🪶';
+
+    const size    = 28 + Math.random() * 22;                  // px（ご要望で一回り大きく。元は18〜34px）
+    const left    = Math.random() * 100;                      // vw%
+    const dur     = 9 + Math.random() * 7;                     // 9〜16s（天使の羽のようにゆっくり舞い落ちる）
+    const delay   = -(Math.random() * dur);                    // ランダムな位相から開始(開始直後から画面に散らばった状態にする)
+    const drift1  = 30 + Math.random() * 50;                    // 左右にふわふわ揺れる振れ幅(px)
+    const drift2  = -(30 + Math.random() * 50);
+    const rot1    = -(10 + Math.random() * 20);                 // 羽毛がゆらゆら傾く角度(deg)
+    const rot2    = 10 + Math.random() * 20;
+    const opacity = 0.65 + Math.random() * 0.3;
+
+    piece.style.setProperty('--mv-f-size',    `${size}px`);
+    piece.style.setProperty('--mv-f-left',    `${left}%`);
+    piece.style.setProperty('--mv-f-dur',     `${dur}s`);
+    piece.style.setProperty('--mv-f-delay',   `${delay}s`);
+    piece.style.setProperty('--mv-f-drift1',  `${drift1}px`);
+    piece.style.setProperty('--mv-f-drift2',  `${drift2}px`);
+    piece.style.setProperty('--mv-f-rot1',    `${rot1}deg`);
+    piece.style.setProperty('--mv-f-rot2',    `${rot2}deg`);
+    piece.style.setProperty('--mv-f-opacity', opacity);
+
+    layer.appendChild(piece);
+  }
+}
+
+// ============================================================
+//  花びらがひらひら揺れながら舞う演出（現状はクラブのMVのみ）
+// ============================================================
+
+// この配列にスート名を足せば、他のスートにも同じ演出を追加できる
+const MV_PETAL_SUITS = ['clubs'];
+
+const MV_PETAL_CHARS  = ['✿', '❀', '✾'];
+const MV_PETAL_COLORS = ['#ffb6c1', '#ffd6e0', '#ffffff', '#fbcfe8'];
+const MV_PETAL_COUNT  = 38;
+
+function spawnPetals() {
+  if (MV_PETAL_SUITS.indexOf(mvSuit) === -1) return;
+
+  const layer = document.getElementById('mv-petal-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+
+  for (let i = 0; i < MV_PETAL_COUNT; i++) {
+    const piece = document.createElement('span');
+    piece.className = 'mv-petal-piece';
+    piece.textContent = MV_PETAL_CHARS[Math.floor(Math.random() * MV_PETAL_CHARS.length)];
+
+    const size    = 12 + Math.random() * 14;                   // px
+    const left    = Math.random() * 100;                       // vw%
+    const dur     = 8 + Math.random() * 6;                      // 8〜14s（ゆったり上昇する）
+    const delay   = -(Math.random() * dur);                     // ランダムな位相から開始(開始直後から画面に散らばった状態にする)
+    const drift   = (Math.random() - 0.5) * 90;                 // ハートと同様、左右にジグザグせず一方向にふわっと流れる程度(px)
+    const rot     = (Math.random() - 0.5) * 40;                 // わずかな傾き(deg)
+    const opacity = 0.7 + Math.random() * 0.3;
+    const color   = MV_PETAL_COLORS[Math.floor(Math.random() * MV_PETAL_COLORS.length)];
+
+    piece.style.setProperty('--mv-p-size',    `${size}px`);
+    piece.style.setProperty('--mv-p-left',    `${left}%`);
+    piece.style.setProperty('--mv-p-dur',     `${dur}s`);
+    piece.style.setProperty('--mv-p-delay',   `${delay}s`);
+    piece.style.setProperty('--mv-p-drift',   `${drift}px`);
+    piece.style.setProperty('--mv-p-rot',     `${rot}deg`);
+    piece.style.setProperty('--mv-p-opacity', opacity);
+    piece.style.setProperty('--mv-p-color',   color);
 
     layer.appendChild(piece);
   }

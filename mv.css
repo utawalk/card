@@ -123,25 +123,37 @@ body.mv-suit-diamonds { --mv-accent: var(--diamond); }
   100% { transform: scale(1.22) translate(0, -2.2%); }
 }
 
-.mv-motion-a .mv-card-img { animation-name: mv-move-a; }
-.mv-motion-b .mv-card-img { animation-name: mv-move-b; }
-.mv-motion-c .mv-card-img { animation-name: mv-move-c; }
-.mv-motion-d .mv-card-img { animation-name: mv-move-d; }
+.mv-card-img.mv-motion-a { animation-name: mv-move-a; }
+.mv-card-img.mv-motion-b { animation-name: mv-move-b; }
+.mv-card-img.mv-motion-c { animation-name: mv-move-c; }
+.mv-card-img.mv-motion-d { animation-name: mv-move-d; }
 
-/* --- K・Q・J 専用：全身 → 顔まわりへぐっと寄っていく演出 --- */
+/* --- K・Q・J 専用：最初に顔を画面中央へアップ表示 → 全身 → 再び顔まわりへぐっと寄っていく演出 ---
+   ご要望により、全身の絵を見せる前に、まず顔だけを大きく中央に映す「顔アップ」の
+   段階を追加した。transform-origin（下の.mv-card-imgで50% 30%に設定）が、もともと
+   顔がある付近を基準にズームする設定になっているため、ここを大きくスケールするだけで
+   顔だけが画面中央付近にアップ表示される。
+   注意: カード切り替え時、`.mv-card-layer` は `opacity: 0 → 1` の1秒かけたフェードインで
+   現れる(下の.mv-card-layerを参照)。最初の実装では顔アップの静止時間が16%(約832ms)しか
+   なく、この1秒のフェードインとほぼ重なってしまい、顔が透明に近い状態のまま次のズーム
+   アウトに移ってしまって「見えない」状態になっていた。これを踏まえ、顔アップの静止時間
+   を30%(約1560ms)まで伸ばし、フェードインが終わったあとも十分な時間(約560ms)顔アップが
+   はっきり見えるようにした。 */
 @keyframes mv-move-featured {
-  0%   { transform: scale(1.0)  translate(0, 5%); }
-  55%  { transform: scale(1.3)  translate(0, -3%); }
-  100% { transform: scale(1.55) translate(0, -7%); }
+  0%   { transform: scale(2.2)  translate(0, -6%); } /* ① 顔を画面中央に大きくアップ表示 */
+  30%  { transform: scale(2.2)  translate(0, -6%); } /* ①のまま静止(フェードイン完了後も見える時間を確保) */
+  50%  { transform: scale(1.0)  translate(0, 5%);  } /* ② 全身が見えるところまでズームアウト */
+  75%  { transform: scale(1.3)  translate(0, -3%); } /* ③ 以前からの中間演出 */
+  100% { transform: scale(1.55) translate(0, -7%); } /* ④ 以前からの終了演出（再び顔へ寄っていく） */
 }
-.mv-motion-featured .mv-card-img { animation-name: mv-move-featured; }
+.mv-card-img.mv-motion-featured { animation-name: mv-move-featured; }
 
 /* --- フィナーレ（スート完成絵）：ゆっくり引いて全体を見せる --- */
 @keyframes mv-move-finale {
   0%   { transform: scale(1.35) translate(0, -2%); }
   100% { transform: scale(1.02) translate(0, 0.5%); }
 }
-.mv-motion-finale .mv-card-img { animation-name: mv-move-finale; }
+.mv-card-img.mv-motion-finale { animation-name: mv-move-finale; }
 
 /* --- ランクバッジ（カードごとに左下へフェードイン） --- */
 .mv-rank-badge {
@@ -233,6 +245,122 @@ body.mv-suit-clubs .mv-vignette {
   8%   { opacity: 1; }
   92%  { opacity: 0.85; }
   100% { transform: translate(var(--mv-c-drift, 30px), 108vh) rotate(var(--mv-c-rot, 360deg)); opacity: 0; }
+}
+
+/* ============================================================
+   ハート＋星が下から上に上がっていく演出（現状はハートのMVのみ）
+   ============================================================ */
+
+.mv-riser-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mv-riser-piece {
+  position: absolute;
+  top: 0;
+  left: var(--mv-r-left, 50%);
+  will-change: transform, opacity;
+  animation: mv-riser-rise var(--mv-r-dur, 12s) ease-in var(--mv-r-delay, 0s) infinite;
+}
+
+/* ハート（キュートに光るハート） */
+.mv-riser-heart {
+  font-size: var(--mv-r-size, 26px);
+  line-height: 1;
+  color: var(--mv-r-color, var(--mv-accent));
+  text-shadow: 0 0 8px var(--mv-r-color, rgba(255,255,255,0.8)), 0 0 16px rgba(255,255,255,0.4);
+}
+
+/* 星（キラッとした光の粒） */
+.mv-riser-star {
+  font-size: var(--mv-r-size, 14px);
+  line-height: 1;
+  color: var(--mv-r-color, #fff2c2);
+  text-shadow: 0 0 8px var(--mv-r-color, rgba(255,255,255,0.9)), 0 0 16px rgba(255,255,255,0.5);
+}
+
+@keyframes mv-riser-rise {
+  /* 画面の下(108vh=画面外)から上(-8vh=画面外)まで、画面全体を縦断させる。
+     以前は開始位置が「12vh」(画面上部付近)になっており、上部に現れてすぐ
+     画面外に消えるだけになっていたため、全面を通過するように修正した。 */
+  0%   { transform: translate(0, 108vh) rotate(0deg);   opacity: 0; }
+  10%  { opacity: var(--mv-r-opacity, 0.9); }
+  88%  { opacity: var(--mv-r-opacity, 0.9); }
+  100% { transform: translate(var(--mv-r-drift, 26px), -8vh) rotate(var(--mv-r-rot, 10deg)); opacity: 0; }
+}
+
+/* ============================================================
+   鳥の羽毛が舞い落ちる演出（現状はスペードのMVのみ。mv.jsが要素を生成する）
+   ============================================================ */
+
+.mv-feather-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mv-feather-piece {
+  position: absolute;
+  top: 0;
+  left: var(--mv-f-left, 50%);
+  font-size: var(--mv-f-size, 22px);
+  line-height: 1;
+  opacity: 0;
+  /* 天使の羽のような、白くふんわり光る羽毛に見せるための加工 */
+  filter: grayscale(1) brightness(1.7) drop-shadow(0 0 10px rgba(255,255,255,0.65));
+  animation: mv-feather-fall var(--mv-f-dur, 12s) ease-in-out var(--mv-f-delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes mv-feather-fall {
+  0%   { transform: translate(0, -10vh) rotate(var(--mv-f-rot1, -15deg)); opacity: 0; }
+  8%   { opacity: var(--mv-f-opacity, 0.85); }
+  25%  { transform: translate(var(--mv-f-drift1, 40px), 15vh)  rotate(var(--mv-f-rot2, 20deg)); }
+  50%  { transform: translate(var(--mv-f-drift2, -40px), 45vh) rotate(var(--mv-f-rot1, -15deg)); }
+  75%  { transform: translate(var(--mv-f-drift1, 40px), 75vh)  rotate(var(--mv-f-rot2, 20deg)); }
+  92%  { opacity: var(--mv-f-opacity, 0.85); }
+  100% { transform: translate(var(--mv-f-drift2, -40px), 108vh) rotate(var(--mv-f-rot1, -15deg)); opacity: 0; }
+}
+
+/* ============================================================
+   花びらがひらひら揺れながら舞う演出（現状はクラブのMVのみ。mv.jsが要素を生成する）
+   ============================================================ */
+
+.mv-petal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mv-petal-piece {
+  position: absolute;
+  top: 0;
+  left: var(--mv-p-left, 50%);
+  font-size: var(--mv-p-size, 16px);
+  line-height: 1;
+  opacity: 0;
+  color: var(--mv-p-color, #ffd6e0);
+  text-shadow: 0 0 6px var(--mv-p-color, rgba(255,214,224,0.8)), 0 0 12px rgba(255,255,255,0.4);
+  animation: mv-petal-rise var(--mv-p-dur, 11s) ease-in var(--mv-p-delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes mv-petal-rise {
+  /* ハートの上昇演出(mv-riser-rise)と同じく、左右にジグザグせず
+     画面の下(108vh=画面外)から上(-10vh=画面外)へまっすぐ上昇させる。
+     横方向はわずかな一方向の流れ(--mv-p-drift)とわずかな傾き(--mv-p-rot)のみ。 */
+  0%   { transform: translate(0, 108vh) rotate(0deg); opacity: 0; }
+  10%  { opacity: var(--mv-p-opacity, 0.9); }
+  88%  { opacity: var(--mv-p-opacity, 0.9); }
+  100% { transform: translate(var(--mv-p-drift, 26px), -10vh) rotate(var(--mv-p-rot, 10deg)); opacity: 0; }
 }
 
 /* ============================================================
