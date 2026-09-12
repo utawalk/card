@@ -319,13 +319,16 @@ body.mv-suit-clubs .mv-vignette {
 }
 
 @keyframes mv-feather-fall {
-  0%   { transform: translate(0, -10vh) rotate(var(--mv-f-rot1, -15deg)); opacity: 0; }
+  /* ご要望で動きは元の「上から下へ落ちる」に戻した。左右のジグザグ揺れも維持。
+     加えて、羽毛の絵そのものを上下逆さまに見せるため、各キーフレームの
+     transformの末尾に scaleY(-1) を付け足している(縦方向の鏡映)。 */
+  0%   { transform: translate(0, -10vh) rotate(var(--mv-f-rot1, -15deg)) scaleY(-1); opacity: 0; }
   8%   { opacity: var(--mv-f-opacity, 0.85); }
-  25%  { transform: translate(var(--mv-f-drift1, 40px), 15vh)  rotate(var(--mv-f-rot2, 20deg)); }
-  50%  { transform: translate(var(--mv-f-drift2, -40px), 45vh) rotate(var(--mv-f-rot1, -15deg)); }
-  75%  { transform: translate(var(--mv-f-drift1, 40px), 75vh)  rotate(var(--mv-f-rot2, 20deg)); }
+  25%  { transform: translate(var(--mv-f-drift1, 40px), 15vh)  rotate(var(--mv-f-rot2, 20deg)) scaleY(-1); }
+  50%  { transform: translate(var(--mv-f-drift2, -40px), 45vh) rotate(var(--mv-f-rot1, -15deg)) scaleY(-1); }
+  75%  { transform: translate(var(--mv-f-drift1, 40px), 75vh)  rotate(var(--mv-f-rot2, 20deg)) scaleY(-1); }
   92%  { opacity: var(--mv-f-opacity, 0.85); }
-  100% { transform: translate(var(--mv-f-drift2, -40px), 108vh) rotate(var(--mv-f-rot1, -15deg)); opacity: 0; }
+  100% { transform: translate(var(--mv-f-drift2, -40px), 108vh) rotate(var(--mv-f-rot1, -15deg)) scaleY(-1); opacity: 0; }
 }
 
 /* ============================================================

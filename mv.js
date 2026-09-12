@@ -119,10 +119,21 @@ function applyWallpaper() {
 // ============================================================
 
 // この配列にスート名を足せば、他のスートにも紙吹雪を追加できる
-const MV_CONFETTI_SUITS = ['diamonds'];
+// ご要望でスペードにも追加(羽毛だけだと寂しいので、ダイヤと同じキラキラの光の粒を追加)
+const MV_CONFETTI_SUITS = ['diamonds', 'spades'];
+
+// この配列に入っているスートは、四角形/丸の紙吹雪を出さず、✦の星型だけにする
+// (ご要望でスペードは星のみに変更。ダイヤは従来通り四角形/丸+星の両方のまま)
+const MV_CONFETTI_STAR_ONLY_SUITS = ['spades'];
 
 const MV_CONFETTI_COLORS = ['#fff2c2', '#fbbf24', '#f5d060', '#ffffff'];
 const MV_CONFETTI_COUNT  = 46;
+
+// スートごとに色を変えたい場合はここに追加する(無ければ上のMV_CONFETTI_COLORSを使う)
+// ご要望でスペードは黄色系ではなく青系(水色)の光にした
+const MV_CONFETTI_COLORS_BY_SUIT = {
+  spades: ['#bfe6ff', '#7ecbff', '#dff5ff', '#ffffff'],
+};
 
 function spawnConfetti() {
   if (MV_CONFETTI_SUITS.indexOf(mvSuit) === -1) return;
@@ -131,8 +142,11 @@ function spawnConfetti() {
   if (!layer) return;
   layer.innerHTML = '';
 
+  const starOnly = MV_CONFETTI_STAR_ONLY_SUITS.indexOf(mvSuit) !== -1;
+  const colors   = MV_CONFETTI_COLORS_BY_SUIT[mvSuit] || MV_CONFETTI_COLORS;
+
   for (let i = 0; i < MV_CONFETTI_COUNT; i++) {
-    const isStar = Math.random() < 0.35;
+    const isStar = starOnly ? true : Math.random() < 0.35;
 
     const piece = document.createElement('span');
     piece.className = 'mv-confetti-piece' + (isStar ? ' mv-confetti-star' : '');
@@ -144,7 +158,7 @@ function spawnConfetti() {
     const delay = -(Math.random() * dur);                                         // ランダムな位相から開始
     const drift = (Math.random() - 0.5) * 140;                                    // 左右の揺れ(px)
     const rot   = 180 + Math.random() * 540;                                      // 回転量(deg)
-    const color = MV_CONFETTI_COLORS[Math.floor(Math.random() * MV_CONFETTI_COLORS.length)];
+    const color = colors[Math.floor(Math.random() * colors.length)];
 
     piece.style.setProperty('--mv-c-size',  `${size}px`);
     piece.style.setProperty('--mv-c-left',  `${left}%`);
@@ -214,7 +228,7 @@ function spawnRisers() {
 // この配列にスート名を足せば、他のスートにも同じ演出を追加できる
 const MV_FEATHER_SUITS = ['spades'];
 
-const MV_FEATHER_COUNT = 18; // ご要望で数を減らした（元は30）
+const MV_FEATHER_COUNT = 9; // ご要望で半分に減らした（元は30→18→9）
 
 function spawnFeathers() {
   if (MV_FEATHER_SUITS.indexOf(mvSuit) === -1) return;
